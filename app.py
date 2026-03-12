@@ -8,10 +8,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-# ── Page config ───────────────────────────────────────────────────────────────
+# Page config 
 st.set_page_config(page_title="AskMyDoc", page_icon="📄", layout="centered")
 
-# ── CSS (assigned to a variable first to avoid Python 3.14 parsing quirks) ───
+#  CSS 
 CSS = (
     "<style>"
     "@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap');"
@@ -46,7 +46,7 @@ CSS = (
 )
 st.markdown(CSS, unsafe_allow_html=True)
 
-# ── Title ─────────────────────────────────────────────────────────────────────
+#  Title 
 TITLE_HTML = (
     "<div class='title-wrap'>"
     "<h1>AskMyDoc <span class='accent'>·</span> AI PDF Question Answering</h1>"
@@ -56,11 +56,11 @@ TITLE_HTML = (
 st.markdown(TITLE_HTML, unsafe_allow_html=True)
 st.markdown("---")
 
-# ── Session state ─────────────────────────────────────────────────────────────
+#  Session state 
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
 
-# ── Cached resources ──────────────────────────────────────────────────────────
+#  Cached resources 
 @st.cache_resource(show_spinner=False)
 def load_embeddings():
     return HuggingFaceEmbeddings(
@@ -76,7 +76,7 @@ def load_llm():
     model.eval()
     return tokenizer, model
 
-# ── QA logic ──────────────────────────────────────────────────────────────────
+# QA logic 
 def answer_question(question, vectorstore):
     docs    = vectorstore.similarity_search(question, k=3)
     context = "\n\n".join(d.page_content for d in docs)
@@ -92,7 +92,7 @@ def answer_question(question, vectorstore):
         outputs = model.generate(**inputs, max_new_tokens=128, num_beams=4, early_stopping=True)
     return tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 
-# ── Step 1: Upload ────────────────────────────────────────────────────────────
+#  Step 1: Upload 
 st.markdown("<p class='section-label'>&#9312; Upload your PDF</p>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
 
@@ -113,13 +113,13 @@ if uploaded_file is not None and st.session_state.vectorstore is None:
 elif uploaded_file is None and st.session_state.vectorstore is not None:
     st.session_state.vectorstore = None
 
-# ── Step 2: Question ──────────────────────────────────────────────────────────
+#  Step 2: Question 
 st.markdown("---")
 st.markdown("<p class='section-label'>&#9313; Ask a question</p>", unsafe_allow_html=True)
 question    = st.text_input("", placeholder="e.g. What is the main topic of this document?", label_visibility="collapsed")
 ask_clicked = st.button("Get Answer")
 
-# ── Step 3: Answer ────────────────────────────────────────────────────────────
+#  Step 3: Answer 
 if ask_clicked:
     if st.session_state.vectorstore is None:
         st.warning("Please upload a PDF document first.")
@@ -137,4 +137,5 @@ if ask_clicked:
             )
             st.markdown(answer_html, unsafe_allow_html=True)
         else:
+
             st.info("No answer could be generated. Try rephrasing your question.")
