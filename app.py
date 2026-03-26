@@ -165,26 +165,32 @@ def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
 
 def text_to_audio(text: str) -> bytes:
     """
-    Convert text to natural speech using gTTS.
-    Produces clearer and more human-like voice than pyttsx3.
-    Works both locally and on Streamlit Cloud.
+    Convert text to speech in selected language
     """
 
-    # handle long PDF text safely
+    lang_map = {
+        "English": "en",
+        "Hindi": "hi",
+        "Marathi": "mr"
+    }
+
+    selected_lang = st.session_state.get("audio_lang", "English")
+    lang_code = lang_map.get(selected_lang, "en")
+
     MAX_CHARS = 4000
 
-    chunks = [
+    text_chunks = [
         text[i:i+MAX_CHARS]
         for i in range(0, len(text), MAX_CHARS)
     ]
 
     audio_bytes = b""
 
-    for chunk in chunks:
+    for chunk in text_chunks:
 
         tts = gTTS(
             text=chunk,
-            lang="en",
+            lang=lang_code,
             slow=False
         )
 
@@ -439,6 +445,13 @@ with st.sidebar:
 
         # ── Read PDF Aloud ────────────────────────────────────────────────────
         st.markdown("<span class='sidebar-label'>🔊 Read PDF Aloud</span>", unsafe_allow_html=True)
+        st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
+
+audio_language = st.selectbox(
+    "",
+    ["English", "Hindi", "Marathi"],
+    key="audio_lang"
+)
         if st.button("Generate Audio"):
             with st.spinner("Converting to speech…"):
                 st.session_state.pdf_audio = text_to_audio(st.session_state.full_text)
