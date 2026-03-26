@@ -390,7 +390,7 @@ def generate_quiz(chunks: list) -> list:
 # ─────────────────────────────────────────────────────────────────────────────
 # SIDEBAR
 # ─────────────────────────────────────────────────────────────────────────────
-with st.sidebar:
+    with st.sidebar:
 
     st.markdown(
         "<div style='padding:0.2rem 0 1.4rem 0;'>"
@@ -400,11 +400,11 @@ with st.sidebar:
         "AI PDF Question Answering</p></div>",
         unsafe_allow_html=True,
     )
-st.selectbox(
-    "🌐 Audio Language",
-    ["English", "Hindi", "Marathi"],
-    key="audio_lang"
-)
+    st.selectbox(
+        "🌐 Audio Language",
+        ["English", "Hindi", "Marathi"],
+        key="audio_lang"
+    )
     st.markdown("<span class='sidebar-label'>Upload PDF</span>", unsafe_allow_html=True)
 
     uploaded = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
