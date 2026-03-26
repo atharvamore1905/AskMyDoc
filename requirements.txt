@@ -11,3 +11,4 @@ pyttsx3
 SpeechRecognition
 audio-recorder-streamlit
 gtts
+deep-translator
