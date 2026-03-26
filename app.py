@@ -5,7 +5,6 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-import pyttsx3
 import speech_recognition as sr
 from audio_recorder_streamlit import audio_recorder
 import streamlit.components.v1 as components
@@ -138,6 +137,8 @@ DEFAULTS = {
 for k, v in DEFAULTS.items():
     if k not in st.session_state:
         st.session_state[k] = v
+    if "audio_lang" not in st.session_state:
+    st.session_state.audio_lang = "English"
 
 # ── Cached loaders ────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
@@ -171,23 +172,21 @@ def text_to_audio(text: str) -> bytes:
         "Marathi": "mr"
     }
 
-    selected_lang = st.session_state.get("audio_lang", "English")
-
-    lang_code = lang_map.get(selected_lang, "en")
+    lang_code = lang_map.get(st.session_state.audio_lang, "en")
 
     MAX_CHARS = 4000
 
-    chunks = [
+    parts = [
         text[i:i+MAX_CHARS]
         for i in range(0, len(text), MAX_CHARS)
     ]
 
     audio_bytes = b""
 
-    for chunk in chunks:
+    for p in parts:
 
         tts = gTTS(
-            text=chunk,
+            text=p,
             lang=lang_code,
             slow=False
         )
@@ -401,7 +400,11 @@ with st.sidebar:
         "AI PDF Question Answering</p></div>",
         unsafe_allow_html=True,
     )
-
+st.selectbox(
+    "🌐 Audio Language",
+    ["English", "Hindi", "Marathi"],
+    key="audio_lang"
+)
     st.markdown("<span class='sidebar-label'>Upload PDF</span>", unsafe_allow_html=True)
 
     uploaded = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
