@@ -164,9 +164,6 @@ def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
     return tok.decode(out[0], skip_special_tokens=True).strip()
 
 def text_to_audio(text: str) -> bytes:
-    """
-    Convert text to speech in selected language
-    """
 
     lang_map = {
         "English": "en",
@@ -175,18 +172,19 @@ def text_to_audio(text: str) -> bytes:
     }
 
     selected_lang = st.session_state.get("audio_lang", "English")
+
     lang_code = lang_map.get(selected_lang, "en")
 
     MAX_CHARS = 4000
 
-    text_chunks = [
+    chunks = [
         text[i:i+MAX_CHARS]
         for i in range(0, len(text), MAX_CHARS)
     ]
 
     audio_bytes = b""
 
-    for chunk in text_chunks:
+    for chunk in chunks:
 
         tts = gTTS(
             text=chunk,
@@ -443,22 +441,23 @@ with st.sidebar:
 
         st.markdown("<hr>", unsafe_allow_html=True)
 
-        # ── Read PDF Aloud ────────────────────────────────────────────────────
-        st.markdown("<span class='sidebar-label'>🔊 Read PDF Aloud</span>", unsafe_allow_html=True)
-        st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
+       # ── Read PDF Aloud ────────────────────────────────────────────────────
+st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
 
 audio_language = st.selectbox(
     "",
     ["English", "Hindi", "Marathi"],
     key="audio_lang"
 )
-        if st.button("Generate Audio"):
-            with st.spinner("Converting to speech…"):
-                st.session_state.pdf_audio = text_to_audio(st.session_state.full_text)
-        if st.session_state.pdf_audio:
-            st.audio(st.session_state.pdf_audio, format="audio/mp3")
 
-        st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown("<span class='sidebar-label'>🔊 Read PDF Aloud</span>", unsafe_allow_html=True)
+
+if st.button("Generate Audio"):
+    with st.spinner("Converting to speech…"):
+        st.session_state.pdf_audio = text_to_audio(st.session_state.full_text)
+
+if st.session_state.pdf_audio:
+    st.audio(st.session_state.pdf_audio, format="audio/mp3")
 
         # ── Mic input ─────────────────────────────────────────────────────────
         st.markdown("<span class='sidebar-label'>🎙️ Voice Question</span>", unsafe_allow_html=True)
