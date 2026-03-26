@@ -387,30 +387,41 @@ def generate_quiz(chunks: list) -> list:
     return out
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
 # SIDEBAR
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+
 with st.sidebar:
 
-        st.markdown(
-            "<div style='padding:0.2rem 0 1.4rem 0;'>"
-            "<p style='font-family:Syne,sans-serif;font-weight:800;font-size:1.35rem;"
-            "color:#f0ede6;margin:0;'>📄 AskMyDoc</p>"
-            "<p style='font-size:0.75rem;color:#444;margin:0.25rem 0 0 0;letter-spacing:0.04em;'>"
-            "AI PDF Question Answering</p></div>",
-            unsafe_allow_html=True,
-        )
-        st.selectbox(
-            "🌐 Audio Language",
-            ["English", "Hindi", "Marathi"],
-            key="audio_lang"
-        )
-        st.markdown("<span class='sidebar-label'>Upload PDF</span>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='padding:0.2rem 0 1.4rem 0;'>"
+        "<p style='font-family:Syne,sans-serif;font-weight:800;font-size:1.35rem;"
+        "color:#f0ede6;margin:0;'>📄 AskMyDoc</p>"
+        "<p style='font-size:0.75rem;color:#444;margin:0.25rem 0 0 0;letter-spacing:0.04em;'>"
+        "AI PDF Question Answering</p></div>",
+        unsafe_allow_html=True,
+    )
 
-        uploaded = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
+    # language selector
+    st.selectbox(
+        "🌐 Audio Language",
+        ["English", "Hindi", "Marathi"],
+        key="audio_lang"
+    )
 
+    st.markdown(
+        "<span class='sidebar-label'>Upload PDF</span>",
+        unsafe_allow_html=True
+    )
 
-    # ── Handle upload ─────────────────────────────────────────
+    uploaded = st.file_uploader(
+        "",
+        type=["pdf"],
+        label_visibility="collapsed"
+    )
+
+    # ── Handle upload ─────────────────────────────────────
+
     if uploaded is not None and st.session_state.vectorstore is None:
 
         with st.spinner("Indexing…"):
@@ -421,55 +432,35 @@ with st.sidebar:
 
                 path = tmp.name
 
-
             docs = PyPDFLoader(path).load()
 
-            st.session_state.full_text = "\n\n".join(d.page_content for d in docs)
-
+            st.session_state.full_text = "\n\n".join(
+                d.page_content for d in docs
+            )
 
             chunks = RecursiveCharacterTextSplitter(
-
                 chunk_size=500,
-
                 chunk_overlap=50
-
             ).split_documents(docs)
-
 
             st.session_state.chunks = chunks
 
             st.session_state.vectorstore = FAISS.from_documents(
-
                 chunks,
-
                 load_embeddings()
-
             )
 
-
             for k in ["summary_bullets", "quiz_items", "chat_history"]:
-
                 st.session_state[k] = []
 
-
             for k in ["flowchart_code", "voice_question"]:
-
                 st.session_state[k] = ""
-
 
             st.session_state.pdf_audio = None
 
             os.unlink(path)
 
-
         st.success("✓ Ready!")
-
-
-    elif uploaded is None and st.session_state.vectorstore is not None:
-
-        for k, v in DEFAULTS.items():
-
-            st.session_state[k] = v
 
 
 
