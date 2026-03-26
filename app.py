@@ -9,6 +9,8 @@ import pyttsx3
 import speech_recognition as sr
 from audio_recorder_streamlit import audio_recorder
 import streamlit.components.v1 as components
+from gtts import gTTS
+import tempfile
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AskMyDoc", page_icon="📄", layout="wide")
@@ -162,18 +164,40 @@ def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
     return tok.decode(out[0], skip_special_tokens=True).strip()
 
 def text_to_audio(text: str) -> bytes:
-    """Convert text to WAV bytes using pyttsx3 (fully offline, no internet needed)."""
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 165)   # speaking speed
-    engine.setProperty("volume", 1.0)
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp_path = tmp.name
-    engine.save_to_file(text, tmp_path)
-    engine.runAndWait()
-    engine.stop()
-    with open(tmp_path, "rb") as f:
-        audio_bytes = f.read()
-    os.unlink(tmp_path)
+    """
+    Convert text to natural speech using gTTS.
+    Produces clearer and more human-like voice than pyttsx3.
+    Works both locally and on Streamlit Cloud.
+    """
+
+    # handle long PDF text safely
+    MAX_CHARS = 4000
+
+    chunks = [
+        text[i:i+MAX_CHARS]
+        for i in range(0, len(text), MAX_CHARS)
+    ]
+
+    audio_bytes = b""
+
+    for chunk in chunks:
+
+        tts = gTTS(
+            text=chunk,
+            lang="en",
+            slow=False
+        )
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+            temp_path = tmp.name
+
+        tts.save(temp_path)
+
+        with open(temp_path, "rb") as f:
+            audio_bytes += f.read()
+
+        os.unlink(temp_path)
+
     return audio_bytes
 
 def transcribe(wav: bytes) -> str:
