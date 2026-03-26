@@ -138,7 +138,7 @@ for k, v in DEFAULTS.items():
     if k not in st.session_state:
         st.session_state[k] = v
     if "audio_lang" not in st.session_state:
-    st.session_state.audio_lang = "English"
+        st.session_state.audio_lang = "English"
 
 # ── Cached loaders ────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
