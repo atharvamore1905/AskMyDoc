@@ -10,3 +10,4 @@ torch
 pyttsx3
 SpeechRecognition
 audio-recorder-streamlit
+gtts
