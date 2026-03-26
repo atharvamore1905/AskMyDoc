@@ -10,6 +10,7 @@ from audio_recorder_streamlit import audio_recorder
 import streamlit.components.v1 as components
 from gtts import gTTS
 import tempfile
+from deep_translator import GoogleTranslator
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AskMyDoc", page_icon="📄", layout="wide")
@@ -172,21 +173,36 @@ def text_to_audio(text: str) -> bytes:
         "Marathi": "mr"
     }
 
-    lang_code = lang_map.get(st.session_state.audio_lang, "en")
+    selected_lang = st.session_state.get("audio_lang", "English")
+
+    lang_code = lang_map.get(selected_lang, "en")
+
+    # translate text if needed
+    if selected_lang != "English":
+
+        try:
+            text = GoogleTranslator(
+                source="auto",
+                target=lang_code
+            ).translate(text)
+
+        except:
+            pass  # fallback to original text if translation fails
+
 
     MAX_CHARS = 4000
 
-    parts = [
+    chunks = [
         text[i:i+MAX_CHARS]
         for i in range(0, len(text), MAX_CHARS)
     ]
 
     audio_bytes = b""
 
-    for p in parts:
+    for chunk in chunks:
 
         tts = gTTS(
-            text=p,
+            text=chunk,
             lang=lang_code,
             slow=False
         )
