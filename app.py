@@ -402,17 +402,17 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # Language selector (applies to ALL audio)
+    # 🌐 LANGUAGE SELECTOR (used for ALL audio)
+    st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
+
     st.selectbox(
-        "🌐 Audio Language",
+        "",
         ["English", "Hindi", "Marathi"],
         key="audio_lang"
     )
 
-    st.markdown(
-        "<span class='sidebar-label'>Upload PDF</span>",
-        unsafe_allow_html=True
-    )
+    # 📄 Upload PDF
+    st.markdown("<span class='sidebar-label'>Upload PDF</span>", unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
         "",
@@ -430,7 +430,6 @@ with st.sidebar:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
 
                 tmp.write(uploaded.read())
-
                 path = tmp.name
 
 
@@ -503,8 +502,7 @@ with st.sidebar:
         st.markdown("<hr>", unsafe_allow_html=True)
 
 
-
-        # 🔊 READ PDF
+        # 🔊 READ PDF ALOUD
 
         st.markdown(
             "<span class='sidebar-label'>🔊 Read PDF Aloud</span>",
@@ -530,7 +528,6 @@ with st.sidebar:
 
 
         st.markdown("<hr>", unsafe_allow_html=True)
-
 
 
         # 🎙️ VOICE QUESTION
@@ -582,46 +579,6 @@ with st.sidebar:
 
             else:
 
-                st.warning("Couldn't hear clearly. Try again.")
-       # ── Read PDF Aloud ────────────────────────────────────────────────────
-st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
-
-audio_language = st.selectbox(
-    "",
-    ["English", "Hindi", "Marathi"],
-    key="audio_lang"
-)
-
-st.markdown("<span class='sidebar-label'>🔊 Read PDF Aloud</span>", unsafe_allow_html=True)
-
-if st.button("Generate Audio"):
-    with st.spinner("Converting to speech…"):
-        st.session_state.pdf_audio = text_to_audio(st.session_state.full_text)
-
-if st.session_state.pdf_audio:
-    st.audio(st.session_state.pdf_audio, format="audio/mp3")
-
-        # ── Mic input ─────────────────────────────────────────────────────────
-        st.markdown("<span class='sidebar-label'>🎙️ Voice Question</span>", unsafe_allow_html=True)
-        st.markdown(
-            "<p class='mic-hint'>Click mic → speak → stop → go to Chat tab.</p>",
-            unsafe_allow_html=True,
-        )
-        rec = audio_recorder(
-            text="", recording_color="#c8f04e", neutral_color="#333",
-            icon_name="microphone", icon_size="2x",
-            pause_threshold=3.0, sample_rate=16000,
-        )
-        if rec and rec != st.session_state.last_audio_bytes:
-            st.session_state.last_audio_bytes = rec
-            with st.spinner("Transcribing…"):
-                t = transcribe(rec)
-            if t:
-                st.session_state.voice_question      = t
-                st.session_state.auto_answer_pending = True
-                st.success("🎤 Heard: " + t + " — answering…")
-                st.rerun()
-            else:
                 st.warning("Couldn't hear clearly. Try again.")
 
 
