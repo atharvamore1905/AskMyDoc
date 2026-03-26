@@ -402,7 +402,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # language selector
+    # Language selector (applies to ALL audio)
     st.selectbox(
         "🌐 Audio Language",
         ["English", "Hindi", "Marathi"],
@@ -420,7 +420,8 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    # ── Handle upload ─────────────────────────────────────
+
+    # ── Handle upload ─────────────────────────────
 
     if uploaded is not None and st.session_state.vectorstore is None:
 
@@ -432,23 +433,30 @@ with st.sidebar:
 
                 path = tmp.name
 
+
             docs = PyPDFLoader(path).load()
 
             st.session_state.full_text = "\n\n".join(
                 d.page_content for d in docs
             )
 
+
             chunks = RecursiveCharacterTextSplitter(
                 chunk_size=500,
                 chunk_overlap=50
             ).split_documents(docs)
 
+
             st.session_state.chunks = chunks
+
 
             st.session_state.vectorstore = FAISS.from_documents(
                 chunks,
                 load_embeddings()
             )
+
+
+            # reset derived state
 
             for k in ["summary_bullets", "quiz_items", "chat_history"]:
                 st.session_state[k] = []
@@ -458,54 +466,50 @@ with st.sidebar:
 
             st.session_state.pdf_audio = None
 
+
             os.unlink(path)
+
 
         st.success("✓ Ready!")
 
 
+    elif uploaded is None and st.session_state.vectorstore is not None:
 
-    # ── Stats ─────────────────────────────────────────
+        for k, v in DEFAULTS.items():
+            st.session_state[k] = v
+
+
+
+    # ── Stats ─────────────────────────────
+
     if st.session_state.vectorstore:
 
-        pages = len(set(c.metadata.get("page", 0) for c in st.session_state.chunks))
+        pages = len(
+            set(c.metadata.get("page", 0) for c in st.session_state.chunks)
+        )
 
         chunks_len = len(st.session_state.chunks)
 
 
         st.markdown(
-
             "<div class='stat-row'>"
-
             "<div class='stat-pill'><strong>" + str(pages) + "</strong>Pages</div>"
-
             "<div class='stat-pill'><strong>" + str(chunks_len) + "</strong>Chunks</div>"
-
             "</div>",
-
             unsafe_allow_html=True,
-
         )
 
 
         st.markdown("<hr>", unsafe_allow_html=True)
 
 
-        # 🌐 LANGUAGE SELECTOR
-        st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
-
-        st.selectbox(
-
-            "",
-
-            ["English", "Hindi", "Marathi"],
-
-            key="audio_lang"
-
-        )
-
 
         # 🔊 READ PDF
-        st.markdown("<span class='sidebar-label'>🔊 Read PDF Aloud</span>", unsafe_allow_html=True)
+
+        st.markdown(
+            "<span class='sidebar-label'>🔊 Read PDF Aloud</span>",
+            unsafe_allow_html=True
+        )
 
 
         if st.button("Generate Audio"):
@@ -513,55 +517,44 @@ with st.sidebar:
             with st.spinner("Converting to speech…"):
 
                 st.session_state.pdf_audio = text_to_audio(
-
                     st.session_state.full_text
-
                 )
 
 
         if st.session_state.pdf_audio:
 
             st.audio(
-
                 st.session_state.pdf_audio,
-
                 format="audio/mp3"
-
             )
 
 
         st.markdown("<hr>", unsafe_allow_html=True)
 
 
-        # 🎙️ MIC INPUT
-        st.markdown("<span class='sidebar-label'>🎙️ Voice Question</span>", unsafe_allow_html=True)
+
+        # 🎙️ VOICE QUESTION
+
+        st.markdown(
+            "<span class='sidebar-label'>🎙️ Voice Question</span>",
+            unsafe_allow_html=True
+        )
 
 
         st.markdown(
-
             "<p class='mic-hint'>Click mic → speak → stop → go to Chat tab.</p>",
-
             unsafe_allow_html=True,
-
         )
 
 
         rec = audio_recorder(
-
             text="",
-
             recording_color="#c8f04e",
-
             neutral_color="#333",
-
             icon_name="microphone",
-
             icon_size="2x",
-
             pause_threshold=3.0,
-
             sample_rate=16000,
-
         )
 
 
@@ -590,21 +583,6 @@ with st.sidebar:
             else:
 
                 st.warning("Couldn't hear clearly. Try again.")
-
-    # ── Stats ─────────────────────────────────────────────────────────────────
-    if st.session_state.vectorstore:
-        pages  = len(set(c.metadata.get("page", 0) for c in st.session_state.chunks))
-        chunks = len(st.session_state.chunks)
-        st.markdown(
-            "<div class='stat-row'>"
-            "<div class='stat-pill'><strong>" + str(pages)  + "</strong>Pages</div>"
-            "<div class='stat-pill'><strong>" + str(chunks) + "</strong>Chunks</div>"
-            "</div>",
-            unsafe_allow_html=True,
-        )
-
-        st.markdown("<hr>", unsafe_allow_html=True)
-
        # ── Read PDF Aloud ────────────────────────────────────────────────────
 st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
 
