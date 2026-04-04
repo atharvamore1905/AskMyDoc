@@ -12,10 +12,10 @@ from gtts import gTTS
 import tempfile
 from deep_translator import GoogleTranslator
 
-# ── Page config ───────────────────────────────────────────────────────────────
+#  Page config ─
 st.set_page_config(page_title="AskMyDoc", page_icon="📄", layout="wide")
 
-# ── CSS ───────────────────────────────────────────────────────────────────────
+#  CSS================================================================================================================= 
 CSS = (
     "<style>"
     "@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap');"
@@ -127,8 +127,8 @@ CSS = (
     "</style>"
 )
 st.markdown(CSS, unsafe_allow_html=True)
-
-# ── Session state ─────────────────────────────────────────────────────────────
+#============================================================================================================
+#  Session state
 DEFAULTS = {
     "vectorstore": None, "full_text": "", "chunks": [],
     "chat_history": [], "pdf_audio": None,
@@ -141,7 +141,7 @@ for k, v in DEFAULTS.items():
     if "audio_lang" not in st.session_state:
         st.session_state.audio_lang = "English"
 
-# ── Cached loaders ────────────────────────────────────────────────────────────
+#  Cached loaders 
 @st.cache_resource(show_spinner=False)
 def load_embeddings():
     return HuggingFaceEmbeddings(
@@ -157,7 +157,7 @@ def load_llm():
     mdl.eval()
     return tok, mdl
 
-# ── Core helpers ──────────────────────────────────────────────────────────────
+#  Core helpers 
 def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
     tok, mdl = load_llm()
     inp = tok(prompt, return_tensors="pt", truncation=True, max_length=512)
@@ -231,7 +231,7 @@ def transcribe(wav: bytes) -> str:
     finally:
         os.unlink(p)
 
-# ── Feature functions ─────────────────────────────────────────────────────────
+# Feature functions 
 
 # 1. RAG answer with source chunks returned
 def answer_with_sources(question: str, vs) -> tuple:
@@ -403,9 +403,9 @@ def generate_quiz(chunks: list) -> list:
     return out
 
 
-# ─────────────────────────────────────────────────────────────
+
 # SIDEBAR
-# ─────────────────────────────────────────────────────────────
+
 
 with st.sidebar:
 
@@ -437,7 +437,7 @@ with st.sidebar:
     )
 
 
-    # ── Handle upload ─────────────────────────────
+    #  Handle upload 
 
     if uploaded is not None and st.session_state.vectorstore is None:
 
@@ -495,7 +495,7 @@ with st.sidebar:
 
 
 
-    # ── Stats ─────────────────────────────
+    # ── Stats 
 
     if st.session_state.vectorstore:
 
@@ -598,9 +598,9 @@ with st.sidebar:
                 st.warning("Couldn't hear clearly. Try again.")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # MAIN AREA
-# ─────────────────────────────────────────────────────────────────────────────
+
 st.markdown(
     "<p class='page-title'>AskMyDoc <span class='accent'>·</span> AI PDF Q&A</p>"
     "<p class='page-sub'>Upload a PDF in the sidebar — then Chat, Summarize, Visualize or Quiz yourself.</p>",
@@ -608,7 +608,7 @@ st.markdown(
 )
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# ── Welcome screen ────────────────────────────────────────────────────────────
+#  Welcome screen ===========================================================
 if not st.session_state.vectorstore:
     st.markdown(
         "<div class='welcome-card'>"
@@ -625,11 +625,11 @@ if not st.session_state.vectorstore:
         unsafe_allow_html=True,
     )
 
-# ── Main tabs ─────────────────────────────────────────────────────────────────
+# ── Main tabs
 else:
     tab1, tab2, tab3, tab4 = st.tabs(["💬  Chat", "📋  Summary", "🔀  Flowchart", "📝  Quiz"])
 
-    # ══ TAB 1 — CHAT Q&A ══════════════════════════════════════════════════════
+    # ══ TAB 1 — CHAT Q&A 
     with tab1:
         st.markdown(
             "<div class='info-card'><div class='info-card-label'>Chat Q&A with Source Highlighting</div>"
@@ -726,7 +726,7 @@ else:
             st.rerun()
 
 
-    # ══ TAB 2 — SUMMARY ═══════════════════════════════════════════════════════
+    # ══ TAB 2 — SUMMARY 
     with tab2:
         st.markdown(
             "<div class='info-card'><div class='info-card-label'>Smart Summary</div>"
@@ -756,7 +756,7 @@ else:
             st.info("Couldn't extract clear points from this document. Try a more structured PDF.")
 
 
-    # ══ TAB 3 — FLOWCHART ═════════════════════════════════════════════════════
+    # ══ TAB 3 — FLOWCHART 
     with tab3:
         st.markdown(
             "<div class='info-card'><div class='info-card-label'>Concept Flowchart</div>"
@@ -778,7 +778,7 @@ else:
             st.warning("Could not build a flowchart for this document. Try a document with clearer structure.")
 
 
-    # ══ TAB 4 — QUIZ ══════════════════════════════════════════════════════════
+    # ══ TAB 4 — QUIZ
     with tab4:
         st.markdown(
             "<div class='info-card'><div class='info-card-label'>MCQ Quiz</div>"
@@ -809,7 +809,7 @@ else:
                 st.rerun()
 
         if st.session_state.quiz_items:
-            # ── show radio-button questions ───────────────────────────────────
+            # ── show radio-button questions
             disabled = bool(st.session_state["quiz_result"])  # lock after submit
 
             for i, item in enumerate(st.session_state.quiz_items):
@@ -833,7 +833,7 @@ else:
 
             st.markdown("<hr>", unsafe_allow_html=True)
 
-            # ── Submit button ─────────────────────────────────────────────────
+            # ── Submit button
             if not disabled:
                 if st.button("✅ Submit & See Results", type="primary"):
                     score, results = 0, []
@@ -853,7 +853,7 @@ else:
                     }
                     st.rerun()
 
-            # ── Results ───────────────────────────────────────────────────────
+            # ── Results 
             if st.session_state["quiz_result"]:
                 r     = st.session_state["quiz_result"]
                 pct   = int((r["score"] / r["total"]) * 100)
