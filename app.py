@@ -602,7 +602,7 @@ with st.sidebar:
 # MAIN AREA
 
 st.markdown(
-    "<p class='page-title'>AskMyDoc <span class='accent'>·</span> AI PDF Q&A</p>"
+    "<p class='page-title'>AskMyDoc <span class='accent'>·</span> AI-powered PDF study companion</p>"
     "<p class='page-sub'>Upload a PDF in the sidebar — then Chat, Summarize, Visualize or Quiz yourself.</p>",
     unsafe_allow_html=True,
 )
