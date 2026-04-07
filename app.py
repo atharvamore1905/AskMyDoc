@@ -250,7 +250,7 @@ def answer_with_sources(question: str, vs) -> tuple:
         "how many", "which are", "give all", "mention"
     ])
  
-     if is_list_q:
+    if is_list_q:
         prompt = (
             "Using only the context below, list ALL relevant items for the question.\n"
             "Write each item on a new line starting with a dash (-).\n"
