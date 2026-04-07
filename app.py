@@ -238,13 +238,35 @@ def transcribe(wav: bytes) -> str:
 # ── Feature functions ─────────────────────────────────────────────────────────
 
 def answer_with_sources(question: str, vs) -> tuple:
+    # Retrieve 6 chunks so multi-part answers (types, steps, lists) are complete
     docs = vs.similarity_search(question, k=6)
     ctx  = "\n\n".join(d.page_content for d in docs)
-    ans  = run_llm(
-        "Answer concisely using only the context.\n\nContext:\n" + ctx +
-        "\n\nQuestion: " + question + "\nAnswer:",
-        max_new_tokens=250,
-    )
+ 
+    q_lower = question.lower()
+    is_list_q = any(w in q_lower for w in [
+        "types", "kinds", "list", "what are", "name all", "enumerate",
+        "steps", "methods", "techniques", "examples", "categories",
+        "advantages", "disadvantages", "features", "components", "ways",
+        "how many", "which are", "give all", "mention"
+    ])
+ 
+    if is_list_q:
+        prompt = (
+            "Using only the context below, list ALL relevant items for the question.\n"
+            "Write each item on a new line starting with a dash (-).\n"
+            "Be complete — include every item mentioned in the context.\n\n"
+            "Context:\n" + ctx +
+            "\n\nQuestion: " + question + "\nComplete list:"
+        )
+        ans = run_llm(prompt, max_new_tokens=250)
+    else:
+        prompt = (
+            "Answer the question fully and accurately using only the context below.\n\n"
+            "Context:\n" + ctx +
+            "\n\nQuestion: " + question + "\nAnswer:"
+        )
+        ans = run_llm(prompt, max_new_tokens=200)
+ 
     return ans, docs
 
 def summarize_to_bullets(chunks: list) -> list:
