@@ -238,23 +238,23 @@ def transcribe(wav: bytes) -> str:
 # ── Feature functions ─────────────────────────────────────────────────────────
 
 def answer_with_sources(question: str, vs) -> tuple:
-    docs = vs.similarity_search(question, k=3)
+    docs = vs.similarity_search(question, k=6)
     ctx  = "\n\n".join(d.page_content for d in docs)
     ans  = run_llm(
         "Answer concisely using only the context.\n\nContext:\n" + ctx +
         "\n\nQuestion: " + question + "\nAnswer:",
-        max_new_tokens=128,
+        max_new_tokens=250,
     )
     return ans, docs
 
 def summarize_to_bullets(chunks: list) -> list:
-    step   = max(1, len(chunks) // 12)
-    sample = chunks[::step][:12]
+    step   = max(1, len(chunks) // 6)
+    sample = chunks[::step][:6]
     bullets, seen = [], set()
     for c in sample:
         point = run_llm(
             "In one complete sentence, what is the single most important fact or idea in this text?\n"
-            "Text: " + c.page_content[:600] + "\nSentence:",
+            "Text: " + c.page_content[:400] + "\nSentence:",
             max_new_tokens=60,
         ).strip().rstrip(".")
         if not point or len(point) < 15:
