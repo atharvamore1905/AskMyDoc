@@ -239,11 +239,11 @@ def transcribe(wav: bytes) -> str:
 
 def answer_with_sources(question: str, vs) -> tuple:
 
-    # better retrieval diversity
+    # retrieve diverse chunks
     docs = vs.max_marginal_relevance_search(
         question,
-        k=6,
-        fetch_k=12
+        k=8,
+        fetch_k=20
     )
 
     ctx = "\n\n".join(d.page_content for d in docs)
@@ -262,22 +262,22 @@ def answer_with_sources(question: str, vs) -> tuple:
     if is_list_q:
 
         prompt = (
-            "From the context below, extract ALL items related to the question.\n"
-            "Return ONLY a comma separated list.\n"
-            "Do not explain.\n"
-            "Include every item mentioned.\n\n"
+            "From the context below, extract ONLY the category names that answer the question.\n"
+            "Return ONLY a comma-separated list of short names.\n"
+            "Do not include explanations.\n"
+            "Do not include generic words like 'Machine Learning'.\n\n"
 
             "Context:\n" + ctx +
 
             "\n\nQuestion: " + question +
 
-            "\nList:"
+            "\nCategories:"
         )
 
-        raw = run_llm(prompt, max_new_tokens=200)
+        raw = run_llm(prompt, max_new_tokens=150)
 
 
-        # split items safely
+        # split safely
         parts = re.split(r",|\n|;", raw)
 
         cleaned = []
@@ -285,48 +285,29 @@ def answer_with_sources(question: str, vs) -> tuple:
 
         for p in parts:
 
-            item = p.strip(" .:-•123456789)")
+            item = p.strip(" .:-•123456789)").title()
 
-            if len(item) < 3:
+            if len(item) < 4:
                 continue
 
-            key = item.lower()
+            # remove generic words
+            if item.lower() in ["machine learning","learning","model"]:
+                continue
 
-            if key not in seen:
-                seen.add(key)
+            if item.lower() not in seen:
+                seen.add(item.lower())
                 cleaned.append(item)
 
 
-        # fallback if model gave sentence instead of list
-        if len(cleaned) < 2:
-
-            raw = run_llm(
-                "List the different items mentioned in the text.\nText:\n"
-                + ctx[:1200],
-                max_new_tokens=120
-            )
-
-            parts = re.split(r",|\n|;", raw)
-
-            for p in parts:
-
-                item = p.strip(" .:-•123456789)")
-
-                if len(item) > 3 and item.lower() not in seen:
-
-                    cleaned.append(item)
-                    seen.add(item.lower())
-
-
-        ans = "\n".join(f"- {x}" for x in cleaned[:8])
+        ans = "\n".join(f"- {x}" for x in cleaned[:10])
 
 
     # -------- NORMAL QUESTIONS --------
     else:
 
         prompt = (
-            "Answer using only the context below.\n"
-            "Write a clear complete answer in 2-4 sentences.\n\n"
+            "Answer clearly using only the context below.\n"
+            "Write 2-4 complete sentences.\n\n"
 
             "Context:\n" + ctx +
 
