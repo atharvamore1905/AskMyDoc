@@ -239,47 +239,53 @@ def transcribe(wav: bytes) -> str:
 
 def answer_with_sources(question: str, vs) -> tuple:
 
-    docs = vs.similarity_search(question, k=6)
+    # better retrieval diversity
+    docs = vs.max_marginal_relevance_search(
+        question,
+        k=6,
+        fetch_k=12
+    )
 
     ctx = "\n\n".join(d.page_content for d in docs)
 
     q_lower = question.lower()
 
     is_list_q = any(w in q_lower for w in [
-        "types","kinds","list","what are","name all","enumerate",
-        "steps","methods","techniques","examples","categories",
-        "advantages","disadvantages","features","components",
-        "ways","how many","which are","give all","mention"
+        "types","kinds","list","what are","name","enumerate",
+        "steps","methods","techniques","examples",
+        "advantages","disadvantages","features",
+        "components","categories","uses"
     ])
 
 
-    # ---------- PROMPT ----------
+    # -------- LIST QUESTIONS --------
     if is_list_q:
 
         prompt = (
-            "Using only the context below, list ALL unique items for the question.\n"
-            "Do not repeat any item.\n"
-            "Return each item on a new line starting with '-'.\n\n"
+            "From the context below, extract ALL items related to the question.\n"
+            "Return ONLY a comma separated list.\n"
+            "Do not explain.\n"
+            "Include every item mentioned.\n\n"
 
             "Context:\n" + ctx +
 
             "\n\nQuestion: " + question +
 
-            "\nUnique list:"
+            "\nList:"
         )
 
-        raw = run_llm(prompt, max_new_tokens=220)
+        raw = run_llm(prompt, max_new_tokens=200)
 
 
-        # ---------- CLEAN DUPLICATES ----------
-        lines = re.split(r"[\n•\-0-9.]", raw)
+        # split items safely
+        parts = re.split(r",|\n|;", raw)
 
         cleaned = []
         seen = set()
 
-        for l in lines:
+        for p in parts:
 
-            item = l.strip()
+            item = p.strip(" .:-•123456789)")
 
             if len(item) < 3:
                 continue
@@ -290,15 +296,37 @@ def answer_with_sources(question: str, vs) -> tuple:
                 seen.add(key)
                 cleaned.append(item)
 
-        ans = "\n".join(f"- {x}" for x in cleaned[:10])
+
+        # fallback if model gave sentence instead of list
+        if len(cleaned) < 2:
+
+            raw = run_llm(
+                "List the different items mentioned in the text.\nText:\n"
+                + ctx[:1200],
+                max_new_tokens=120
+            )
+
+            parts = re.split(r",|\n|;", raw)
+
+            for p in parts:
+
+                item = p.strip(" .:-•123456789)")
+
+                if len(item) > 3 and item.lower() not in seen:
+
+                    cleaned.append(item)
+                    seen.add(item.lower())
 
 
-    # ---------- NORMAL ANSWER ----------
+        ans = "\n".join(f"- {x}" for x in cleaned[:8])
+
+
+    # -------- NORMAL QUESTIONS --------
     else:
 
         prompt = (
-            "Answer clearly using only the context below.\n"
-            "Write 2-4 complete sentences.\n\n"
+            "Answer using only the context below.\n"
+            "Write a clear complete answer in 2-4 sentences.\n\n"
 
             "Context:\n" + ctx +
 
