@@ -238,89 +238,36 @@ def transcribe(wav: bytes) -> str:
 # ── Feature functions ─────────────────────────────────────────────────────────
 
 def answer_with_sources(question: str, vs) -> tuple:
-
-    # retrieve diverse chunks
-    docs = vs.max_marginal_relevance_search(
-        question,
-        k=8,
-        fetch_k=20
-    )
-
-    ctx = "\n\n".join(d.page_content for d in docs)
-
+    # Retrieve 6 chunks so multi-part answers (types, steps, lists) are complete
+    docs = vs.similarity_search(question, k=6)
+    ctx  = "\n\n".join(d.page_content for d in docs)
+ 
     q_lower = question.lower()
-
     is_list_q = any(w in q_lower for w in [
-        "types","kinds","list","what are","name","enumerate",
-        "steps","methods","techniques","examples",
-        "advantages","disadvantages","features",
-        "components","categories","uses"
+        "types", "kinds", "list", "what are", "name all", "enumerate",
+        "steps", "methods", "techniques", "examples", "categories",
+        "advantages", "disadvantages", "features", "components", "ways",
+        "how many", "which are", "give all", "mention"
     ])
-
-
-    # -------- LIST QUESTIONS --------
+ 
     if is_list_q:
-
         prompt = (
-            "From the context below, extract ONLY the category names that answer the question.\n"
-            "Return ONLY a comma-separated list of short names.\n"
-            "Do not include explanations.\n"
-            "Do not include generic words like 'Machine Learning'.\n\n"
-
+            "Using only the context below, list ALL relevant items for the question.\n"
+            "Write each item on a new line starting with a dash (-).\n"
+            "Be complete — include every item mentioned in the context.\n\n"
             "Context:\n" + ctx +
-
-            "\n\nQuestion: " + question +
-
-            "\nCategories:"
+            "\n\nQuestion: " + question + "\nComplete list:"
         )
-
-        raw = run_llm(prompt, max_new_tokens=150)
-
-
-        # split safely
-        parts = re.split(r",|\n|;", raw)
-
-        cleaned = []
-        seen = set()
-
-        for p in parts:
-
-            item = p.strip(" .:-•123456789)").title()
-
-            if len(item) < 4:
-                continue
-
-            # remove generic words
-            if item.lower() in ["machine learning","learning","model"]:
-                continue
-
-            if item.lower() not in seen:
-                seen.add(item.lower())
-                cleaned.append(item)
-
-
-        ans = "\n".join(f"- {x}" for x in cleaned[:10])
-
-
-    # -------- NORMAL QUESTIONS --------
+        ans = run_llm(prompt, max_new_tokens=250)
     else:
-
         prompt = (
-            "Answer clearly using only the context below.\n"
-            "Write 2-4 complete sentences.\n\n"
-
+            "Answer the question fully and accurately using only the context below.\n\n"
             "Context:\n" + ctx +
-
-            "\n\nQuestion: " + question +
-
-            "\nAnswer:"
+            "\n\nQuestion: " + question + "\nAnswer:"
         )
-
-        ans = run_llm(prompt, max_new_tokens=180)
-
-
+        ans = run_llm(prompt, max_new_tokens=200)
+ 
     return ans, docs
-
 def summarize_to_bullets(chunks: list) -> list:
     step   = max(1, len(chunks) // 6)
     sample = chunks[::step][:6]
