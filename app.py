@@ -260,7 +260,7 @@ def answer_with_sources(question: str, vs) -> tuple:
         )
         ans = run_llm(prompt, max_new_tokens=250)
 		lines = list(dict.fromkeys([l.strip() for l in ans.split("\n") if l.strip()]))
-		ans = "\n".join(lines)
+ans = "\n".join(lines)
     else:
         prompt = (
             "Answer the question fully and accurately using only the context below.\n\n"
