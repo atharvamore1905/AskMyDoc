@@ -261,8 +261,8 @@ def answer_with_sources(question: str, vs) -> tuple:
 
         ans = run_llm(prompt, max_new_tokens=250)
 
-        lines = list(dict.fromkeys([l.strip() for l in ans.split("\n") if l.strip()]))
-        ans = "\n".join(lines)
+        parts = re.split(r"\d+\.\s*", ans)
+        ans = "\n".join(dict.fromkeys(["- " + p.strip() for p in parts if len(p.strip()) > 3]))
 
 	
     else:
