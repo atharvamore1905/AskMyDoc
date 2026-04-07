@@ -269,14 +269,17 @@ def answer_with_sources(question: str, vs) -> tuple:
     elif is_list_q:
         # "What are the types of X?" — list every item found
         prompt = (
-            "Using only the context below, list ALL relevant items for the question. "
-            "Write each item on a new line starting with a dash (-). "
+            "Using only the context below, list ALL relevant items for the question.\n"
+            "Write each item on a new line starting with a dash (-).\n"
             "Be complete — include every item mentioned in the context.\n\n"
-            "Context:\n" + ctx[:1800] +
-            "\n\nQuestion: " + question +
-            "\nComplete list:"
+            "Context:\n" + ctx +
+            "\n\nQuestion: " + question + "\nComplete list:"
         )
+
         ans = run_llm(prompt, max_new_tokens=250)
+
+        parts = re.split(r"\d+\.\s*", ans)
+        ans = "\n".join(dict.fromkeys(["- " + p.strip() for p in parts if len(p.strip()) > 3]))
 
     else:
         # General question — full accurate answer
