@@ -817,7 +817,7 @@ else:
         if ask and question.strip():
             with st.spinner("Thinking…"):
                 ans, __ = answer_with_sources(question.strip(), st.session_state.vectorstore)
-            st.session_state.chat_history.append({"question": question.strip(), "answer": ans, "sources": srcs})
+            st.session_state.chat_history.append({"question": question.strip(), "answer": ans})
             st.session_state.voice_question    = ""
             st.session_state["last_ans_audio"] = None
             st.rerun()
