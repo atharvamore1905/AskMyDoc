@@ -238,35 +238,78 @@ def transcribe(wav: bytes) -> str:
 # ── Feature functions ─────────────────────────────────────────────────────────
 
 def answer_with_sources(question: str, vs) -> tuple:
-    # Retrieve 6 chunks so multi-part answers (types, steps, lists) are complete
+
     docs = vs.similarity_search(question, k=6)
-    ctx  = "\n\n".join(d.page_content for d in docs)
- 
+
+    ctx = "\n\n".join(d.page_content for d in docs)
+
     q_lower = question.lower()
+
     is_list_q = any(w in q_lower for w in [
-        "types", "kinds", "list", "what are", "name all", "enumerate",
-        "steps", "methods", "techniques", "examples", "categories",
-        "advantages", "disadvantages", "features", "components", "ways",
-        "how many", "which are", "give all", "mention"
+        "types","kinds","list","what are","name all","enumerate",
+        "steps","methods","techniques","examples","categories",
+        "advantages","disadvantages","features","components",
+        "ways","how many","which are","give all","mention"
     ])
- 
+
+
+    # ---------- PROMPT ----------
     if is_list_q:
+
         prompt = (
-            "Using only the context below, list ALL relevant items for the question.\n"
-            "Write each item on a new line starting with a dash (-).\n"
-            "Be complete — include every item mentioned in the context.\n\n"
+            "Using only the context below, list ALL unique items for the question.\n"
+            "Do not repeat any item.\n"
+            "Return each item on a new line starting with '-'.\n\n"
+
             "Context:\n" + ctx +
-            "\n\nQuestion: " + question + "\nComplete list:"
+
+            "\n\nQuestion: " + question +
+
+            "\nUnique list:"
         )
-        ans = run_llm(prompt, max_new_tokens=250)
+
+        raw = run_llm(prompt, max_new_tokens=220)
+
+
+        # ---------- CLEAN DUPLICATES ----------
+        lines = re.split(r"[\n•\-0-9.]", raw)
+
+        cleaned = []
+        seen = set()
+
+        for l in lines:
+
+            item = l.strip()
+
+            if len(item) < 3:
+                continue
+
+            key = item.lower()
+
+            if key not in seen:
+                seen.add(key)
+                cleaned.append(item)
+
+        ans = "\n".join(f"- {x}" for x in cleaned[:10])
+
+
+    # ---------- NORMAL ANSWER ----------
     else:
+
         prompt = (
-            "Answer the question fully and accurately using only the context below.\n\n"
+            "Answer clearly using only the context below.\n"
+            "Write 2-4 complete sentences.\n\n"
+
             "Context:\n" + ctx +
-            "\n\nQuestion: " + question + "\nAnswer:"
+
+            "\n\nQuestion: " + question +
+
+            "\nAnswer:"
         )
-        ans = run_llm(prompt, max_new_tokens=200)
- 
+
+        ans = run_llm(prompt, max_new_tokens=180)
+
+
     return ans, docs
 
 def summarize_to_bullets(chunks: list) -> list:
