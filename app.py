@@ -238,36 +238,19 @@ def transcribe(wav: bytes) -> str:
 # ── Feature functions ─────────────────────────────────────────────────────────
 
 def answer_with_sources(question: str, vs) -> tuple:
-    docs    = vs.similarity_search(question, k=6)
-    ctx     = "\n\n".join(d.page_content for d in docs)
+    # Retrieve 6 chunks so multi-part answers (types, steps, lists) are complete
+    docs = vs.similarity_search(question, k=6)
+    ctx  = "\n\n".join(d.page_content for d in docs)
+ 
     q_lower = question.lower()
-
-    # ── Detect question type ──────────────────────────────────────────────────
-    is_definition = any(w in q_lower for w in [
-        "what is", "what are", "define", "definition of", "meaning of",
-        "explain", "describe", "tell me about", "what do you mean"
-    ])
     is_list_q = any(w in q_lower for w in [
-        "types", "kinds", "list", "name all", "enumerate", "steps",
-        "methods", "techniques", "examples", "categories", "advantages",
-        "disadvantages", "features", "components", "ways", "how many",
-        "which are", "give all", "mention all"
+        "types", "kinds", "list", "what are", "name all", "enumerate",
+        "steps", "methods", "techniques", "examples", "categories",
+        "advantages", "disadvantages", "features", "components", "ways",
+        "how many", "which are", "give all", "mention"
     ])
-
-    if is_definition:
-        # "What is X?" — force a complete, subject-first definition sentence
-        prompt = (
-            "Using only the information in the context below, write a clear and complete "
-            "explanation. Start with the subject name, then explain what it is, "
-            "what it does, and why it matters. Write 2-3 full sentences.\n\n"
-            "Context:\n" + ctx[:1800] +
-            "\n\nQuestion: " + question +
-            "\nDetailed explanation:"
-        )
-        ans = run_llm(prompt, max_new_tokens=220)
-
-    elif is_list_q:
-        # "What are the types of X?" — list every item found
+ 
+    if is_list_q:
         prompt = (
             "Using only the context below, list ALL relevant items for the question.\n"
             "Write each item on a new line starting with a dash (-).\n"
@@ -281,24 +264,23 @@ def answer_with_sources(question: str, vs) -> tuple:
         parts = re.split(r"\d+\.\s*", ans)
         ans = "\n".join(dict.fromkeys(["- " + p.strip() for p in parts if len(p.strip()) > 3]))
 
+	
     else:
-        # General question — full accurate answer
         prompt = (
-            "Using only the context below, give a complete and accurate answer. "
-            "Write in full sentences. Do not cut the answer short.\n\n"
+            "Using only the information in the context below, write a clear and complete "
+            "explanation. Start with the subject name, then explain what it is, "
+            "what it does, and why it matters. Write 1-2 full sentences.\n\n"
             "Context:\n" + ctx[:1800] +
-            "\n\nQuestion: " + question +
-            "\nAnswer:"
+            "\n\nQuestion: " + question + "\nAnswer:"
         )
-        ans = run_llm(prompt, max_new_tokens=220)
 
-    # ── Post-process: fix sentence formatting ─────────────────────────────────
+    ans = run_llm(prompt, max_new_tokens=220)
     ans = ans.strip()
     if ans and ans[0].islower():
-        ans = ans[0].upper() + ans[1:]
+    	ans = ans[0].upper() + ans[1:]
     if ans and not ans.endswith((".", "!", "?")):
         ans += "."
-
+ 
     return ans, docs
 def summarize_to_bullets(chunks: list) -> list:
     step   = max(1, len(chunks) // 6)
