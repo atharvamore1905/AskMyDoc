@@ -254,7 +254,7 @@ def answer_with_sources(question: str, vs) -> tuple:
         prompt = (
             "Using only the context below, list ALL relevant items for the question.\n"
             "Write each item on a new line starting with a dash (-).\n"
-            "Be complete — include every item mentioned in the context.\n\n"
+            "Be complete — include every item mentioned in the context and dont include duplicates.\n\n"
             "Context:\n" + ctx +
             "\n\nQuestion: " + question + "\nComplete list:"
         )
