@@ -258,9 +258,7 @@ def answer_with_sources(question: str, vs) -> tuple:
             "Context:\n" + ctx +
             "\n\nQuestion: " + question + "\nComplete list:"
         )
-
         ans = run_llm(prompt, max_new_tokens=250)
-
         parts = re.split(r"\d+\.\s*", ans)
         ans = "\n".join(dict.fromkeys(["- " + p.strip() for p in parts if len(p.strip()) > 3]))
 
