@@ -760,9 +760,9 @@ else:
     # ══ TAB 1 — CHAT Q&A ══════════════════════════════════════════════════════
     with tab1:
         st.markdown(
-            "<div class='info-card'><div class='info-card-label'>Chat Q&A with Source Highlighting</div>"
+            "<div class='info-card'><div class='info-card-label'>Chat Q&A </div>"
             "<p class='info-card-text'>Ask questions by typing or use the mic in the sidebar. "
-            "Each answer shows which pages it came from.</p></div>",
+            "</p></div>",
             unsafe_allow_html=True,
         )
         for msg in st.session_state.chat_history:
@@ -776,23 +776,7 @@ else:
                 "<div class='chat-text'>" + msg["answer"] + "</div></div>",
                 unsafe_allow_html=True,
             )
-            if msg.get("sources"):
-                chips = "".join(
-                    "<span class='src-chip'>📄 Page " + str(s.metadata.get("page", 0) + 1) + "</span>"
-                    for s in msg["sources"]
-                )
-                st.markdown("<div style='margin:0.2rem 0 0.4rem 1rem;'>" + chips + "</div>", unsafe_allow_html=True)
-                with st.expander("View source chunks"):
-                    for i, s in enumerate(msg["sources"]):
-                        pg = s.metadata.get("page", 0) + 1
-                        st.caption("Chunk " + str(i+1) + "  ·  Page " + str(pg))
-                        st.markdown(
-                            "<div style='background:#0f0f0f;border:1px solid #1a1a1a;border-radius:8px;"
-                            "padding:0.7rem;font-size:0.82rem;color:#888;line-height:1.6;'>"
-                            + s.page_content[:350].replace("<","&lt;").replace(">","&gt;")
-                            + ("…" if len(s.page_content) > 350 else "") + "</div>",
-                            unsafe_allow_html=True,
-                        )
+           
         if st.session_state.chat_history:
             last_ans = st.session_state.chat_history[-1]["answer"]
             st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
@@ -818,7 +802,7 @@ else:
                 ans, srcs = answer_with_sources(auto_q, st.session_state.vectorstore)
             with st.spinner("Generating audio answer…"):
                 auto_audio = text_to_audio(ans)
-            st.session_state.chat_history.append({"question": auto_q, "answer": ans, "sources": srcs})
+            st.session_state.chat_history.append({"question": auto_q, "answer": ans})
             st.session_state["last_ans_audio"] = auto_audio
             st.rerun()
 
@@ -832,7 +816,7 @@ else:
             ask = st.button("Ask →")
         if ask and question.strip():
             with st.spinner("Thinking…"):
-                ans, srcs = answer_with_sources(question.strip(), st.session_state.vectorstore)
+                ans, __ = answer_with_sources(question.strip(), st.session_state.vectorstore)
             st.session_state.chat_history.append({"question": question.strip(), "answer": ans, "sources": srcs})
             st.session_state.voice_question    = ""
             st.session_state["last_ans_audio"] = None
