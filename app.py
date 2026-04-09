@@ -278,7 +278,7 @@ def answer_with_sources(question: str, vs) -> tuple:
     	ans = ans[0].upper() + ans[1:]
     if ans and not ans.endswith((".", "!", "?")):
         ans += "."
- 
+
     return ans, docs
 def summarize_to_bullets(chunks: list) -> list:
     step   = max(1, len(chunks) // 6)
