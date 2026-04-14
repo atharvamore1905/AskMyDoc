@@ -21,22 +21,14 @@ CSS = (
     "html,body,[class*='css']{font-family:'Inter',sans-serif;}"
     ".stApp{background:#0d0d0d;color:#f0ede6;}"
     ".main .block-container{padding-top:1.5rem;}"
-
-    # Sidebar
     "[data-testid='stSidebar']{background:#080808 !important;border-right:1px solid #161616 !important;}"
     "[data-testid='stSidebar'] section{padding:1.2rem !important;}"
-
-    # File uploader
     "[data-testid='stFileUploader']{background:#111;border:1.5px dashed #2a2a2a;border-radius:12px;padding:0.6rem;}"
     "[data-testid='stFileUploaderDropzoneInstructions']{color:#555 !important;}"
-
-    # Text input
     "[data-testid='stTextInput'] input{background:#111 !important;border:1.5px solid #222 !important;"
     "border-radius:10px !important;color:#f0ede6 !important;font-size:0.95rem !important;padding:0.75rem 1rem !important;}"
     "[data-testid='stTextInput'] input:focus{border-color:#c8f04e !important;box-shadow:0 0 0 2px rgba(200,240,78,0.08) !important;}"
     "[data-testid='stTextInput'] input::placeholder{color:#444 !important;}"
-
-    # FIX 1 — Selectbox fully styled so it's visible on dark background
     "[data-testid='stSelectbox']{margin-bottom:0.2rem;}"
     "[data-testid='stSelectbox'] > div > div{background:#111 !important;"
     "border:1.5px solid #2a2a2a !important;border-radius:10px !important;"
@@ -46,16 +38,12 @@ CSS = (
     "[data-baseweb='popover'] ul{background:#111 !important;border:1px solid #2a2a2a !important;border-radius:10px !important;}"
     "[data-baseweb='popover'] li{color:#f0ede6 !important;background:#111 !important;}"
     "[data-baseweb='popover'] li:hover{background:#1e1e1e !important;color:#c8f04e !important;}"
-
-    # Buttons
     ".stButton>button{background:#c8f04e !important;color:#0d0d0d !important;font-family:'Syne',sans-serif !important;"
     "font-weight:700 !important;border:none !important;border-radius:10px !important;"
     "padding:0.6rem 1.4rem !important;font-size:0.85rem !important;letter-spacing:0.03em !important;"
     "transition:opacity 0.15s,transform 0.1s !important;}"
     ".stButton>button:hover{opacity:0.82 !important;transform:translateY(-1px) !important;}"
     ".stButton>button:active{transform:translateY(0) !important;}"
-
-    # Tabs
     ".stTabs [data-baseweb='tab-list']{background:#0f0f0f;border-radius:12px;padding:5px;gap:3px;"
     "border:1px solid #1a1a1a;width:fit-content;}"
     ".stTabs [data-baseweb='tab']{background:transparent;color:#555;border-radius:9px;font-family:'Syne',sans-serif;"
@@ -64,20 +52,12 @@ CSS = (
     ".stTabs [data-baseweb='tab-highlight']{display:none !important;}"
     ".stTabs [data-baseweb='tab-border']{display:none !important;}"
     ".stTabs [data-baseweb='tab-panel']{padding-top:1.5rem !important;}"
-
-    # Expander
     ".streamlit-expanderHeader{background:#111 !important;border-radius:8px !important;color:#888 !important;"
     "font-size:0.82rem !important;border:1px solid #1e1e1e !important;}"
     ".streamlit-expanderContent{background:#0d0d0d !important;border:1px solid #1e1e1e !important;"
     "border-top:none !important;border-radius:0 0 8px 8px !important;}"
-
-    # Alerts
     "[data-testid='stAlert']{border-radius:10px !important;border:none !important;}"
-
-    # Divider
     "hr{border-color:#181818 !important;margin:1.2rem 0 !important;}"
-
-    # Custom classes
     ".sidebar-label{font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.12em;"
     "color:#444;text-transform:uppercase;margin-bottom:0.5rem;margin-top:0.2rem;display:block;}"
     ".stat-row{display:flex;gap:0.5rem;margin:0.6rem 0;}"
@@ -90,7 +70,6 @@ CSS = (
     ".accent{color:#c8f04e;}"
     ".welcome-card{background:#0f0f0f;border:1px solid #191919;border-radius:16px;"
     "padding:3rem 2rem;text-align:center;margin-top:1rem;}"
-    # FIX 2 — 3-column grid so Notes fits naturally
     ".feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-top:1.5rem;}"
     ".feature-item{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:1rem;"
     "font-size:0.83rem;color:#666;text-align:left;}"
@@ -125,7 +104,6 @@ CSS = (
     "padding:0.65rem 1rem;font-size:0.88rem;color:#c8f04e;margin-top:0.5rem;line-height:1.5;}"
     ".mermaid-wrap{background:#080808;border:1px solid #1a1a1a;border-radius:12px;padding:1rem;overflow:hidden;}"
     ".mic-hint{font-size:0.78rem;color:#444;margin:0.4rem 0 0.6rem 0;}"
-    # Notes specific
     ".note-qr{display:flex;align-items:flex-start;gap:0.9rem;background:#0f0f0f;"
     "border:1px solid #191919;border-radius:10px;padding:0.8rem 1rem;margin:0.45rem 0;}"
     ".note-qr-num{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:800;"
@@ -173,7 +151,7 @@ DEFAULTS = {
 for k, v in DEFAULTS.items():
     if k not in st.session_state:
         st.session_state[k] = v
-# FIX 1 — audio_lang initialized OUTSIDE the loop so it's always set
+
 if "audio_lang" not in st.session_state:
     st.session_state.audio_lang = "English"
 
@@ -185,13 +163,15 @@ def load_embeddings():
         model_kwargs={"device": "cpu"},
     )
 
+
 @st.cache_resource(show_spinner=False)
 def load_llm():
     name = "google/flan-t5-base"
-    tok  = AutoTokenizer.from_pretrained(name)
-    mdl  = AutoModelForSeq2SeqLM.from_pretrained(name)
+    tok = AutoTokenizer.from_pretrained(name)
+    mdl = AutoModelForSeq2SeqLM.from_pretrained(name)
     mdl.eval()
     return tok, mdl
+
 
 # ── Core helpers ──────────────────────────────────────────────────────────────
 def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
@@ -201,6 +181,7 @@ def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
         out = mdl.generate(**inp, max_new_tokens=max_new_tokens, num_beams=2, early_stopping=True)
     return tok.decode(out[0], skip_special_tokens=True).strip()
 
+
 def text_to_audio(text: str) -> bytes:
     lang_map = {"English": "en", "Hindi": "hi", "Marathi": "mr"}
     selected_lang = st.session_state.get("audio_lang", "English")
@@ -208,10 +189,10 @@ def text_to_audio(text: str) -> bytes:
     if selected_lang != "English":
         try:
             text = GoogleTranslator(source="auto", target=lang_code).translate(text)
-        except:
+        except Exception:
             pass
     MAX_CHARS = 4000
-    chunks = [text[i:i+MAX_CHARS] for i in range(0, len(text), MAX_CHARS)]
+    chunks = [text[i:i + MAX_CHARS] for i in range(0, len(text), MAX_CHARS)]
     audio_bytes = b""
     for chunk in chunks:
         tts = gTTS(text=chunk, lang=lang_code, slow=False)
@@ -223,25 +204,26 @@ def text_to_audio(text: str) -> bytes:
         os.unlink(temp_path)
     return audio_bytes
 
+
 def transcribe(wav: bytes) -> str:
     r = sr.Recognizer()
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
-        f.write(wav); p = f.name
+        f.write(wav)
+        p = f.name
     try:
         with sr.AudioFile(p) as src:
             return r.recognize_google(r.record(src))
-    except:
+    except Exception:
         return ""
     finally:
         os.unlink(p)
 
-# ── Feature functions ─────────────────────────────────────────────────────────
 
+# ── Feature functions ─────────────────────────────────────────────────────────
 def answer_with_sources(question: str, vs) -> tuple:
-    # Retrieve 6 chunks so multi-part answers (types, steps, lists) are complete
     docs = vs.similarity_search(question, k=6)
-    ctx  = "\n\n".join(d.page_content for d in docs)
- 
+    ctx = "\n\n".join(d.page_content for d in docs)
+
     q_lower = question.lower()
     is_list_q = any(w in q_lower for w in [
         "types", "kinds", "list", "what are", "name all", "enumerate",
@@ -249,7 +231,7 @@ def answer_with_sources(question: str, vs) -> tuple:
         "advantages", "disadvantages", "features", "components", "ways",
         "how many", "which are", "give all", "mention"
     ])
- 
+
     if is_list_q:
         prompt = (
             "Using only the context below, list ALL relevant items for the question.\n"
@@ -261,8 +243,6 @@ def answer_with_sources(question: str, vs) -> tuple:
         ans = run_llm(prompt, max_new_tokens=250)
         parts = re.split(r"\d+\.\s*", ans)
         ans = "\n".join(dict.fromkeys(["- " + p.strip() for p in parts if len(p.strip()) > 3]))
-
-	
     else:
         prompt = (
             "Using only the information in the context below, write a clear and complete "
@@ -271,17 +251,19 @@ def answer_with_sources(question: str, vs) -> tuple:
             "Context:\n" + ctx[:1800] +
             "\n\nQuestion: " + question + "\nAnswer:"
         )
+        ans = run_llm(prompt, max_new_tokens=220)
 
-    ans = run_llm(prompt, max_new_tokens=220)
     ans = ans.strip()
     if ans and ans[0].islower():
-    	ans = ans[0].upper() + ans[1:]
+        ans = ans[0].upper() + ans[1:]
     if ans and not ans.endswith((".", "!", "?")):
         ans += "."
 
     return ans, docs
+
+
 def summarize_to_bullets(chunks: list) -> list:
-    step   = max(1, len(chunks) // 6)
+    step = max(1, len(chunks) // 6)
     sample = chunks[::step][:6]
     bullets, seen = [], set()
     for c in sample:
@@ -294,15 +276,17 @@ def summarize_to_bullets(chunks: list) -> list:
             continue
         key = point[:40].lower()
         if key not in seen:
-            seen.add(key); bullets.append(point)
+            seen.add(key)
+            bullets.append(point)
     return bullets[:8]
 
+
 def generate_flowchart(chunks: list) -> str:
-    step     = max(1, len(chunks) // 6)
+    step = max(1, len(chunks) // 6)
     selected = chunks[::step][:6]
     nodes_text = []
     for c in selected:
-        raw  = c.page_content.strip()
+        raw = c.page_content.strip()
         sent = re.split(r'[.\n]', raw)[0].strip()
         if len(sent) < 8:
             sent = raw[:60].strip()
@@ -316,8 +300,9 @@ def generate_flowchart(chunks: list) -> str:
     for n, txt in enumerate(nodes_text):
         lines.append(f'    {ids[n]}["{txt}"]')
     for n in range(len(nodes_text) - 1):
-        lines.append(f'    {ids[n]} --> {ids[n+1]}')
+        lines.append(f'    {ids[n]} --> {ids[n + 1]}')
     return "flowchart TD\n" + "\n".join(lines)
+
 
 def render_mermaid(code: str):
     safe = code.replace("`", "").replace("\\", "")
@@ -337,6 +322,7 @@ def render_mermaid(code: str):
     )
     components.html(html, height=480, scrolling=True)
 
+
 def _short_distractor(chunk_text: str) -> str:
     sentences = [s.strip() for s in re.split(r'[.\n]', chunk_text) if len(s.strip()) > 10]
     if not sentences:
@@ -346,11 +332,12 @@ def _short_distractor(chunk_text: str) -> str:
         s = s[:s.rfind(' ')]
     return s.strip()
 
+
 def generate_quiz(chunks: list) -> list:
     import random as _r
-    step     = max(1, len(chunks) // 5)
+    step = max(1, len(chunks) // 5)
     selected = chunks[::step][:5]
-    out      = []
+    out = []
     for idx, c in enumerate(selected):
         q = run_llm(
             "Write one clear, specific question about this text.\n"
@@ -385,19 +372,11 @@ def generate_quiz(chunks: list) -> list:
         out.append({"q": q, "a": a, "options": options, "correct": options.index(a)})
     return out
 
-# ── Notes functions ───────────────────────────────────────────────────────────
 
-# FIX 3 — Level 1: titled key facts (Topic | Fact format)
-# ── Claude API helper for notes (gives much better quality than flan-t5) ─────
+# ── Notes functions ───────────────────────────────────────────────────────────
 def _llm_notes(prompt: str, max_tokens: int = 800) -> str:
-    """
-    Use Groq (free) with Llama-3 for high quality notes generation.
-    Get a free API key at: https://console.groq.com
-    Falls back to flan-t5 if Groq key not set.
-    """
     import os as _os
 
-    # Read Groq API key
     api_key = _os.environ.get("GROQ_API_KEY", "")
     if not api_key:
         try:
@@ -442,16 +421,12 @@ def _llm_notes(prompt: str, max_tokens: int = 800) -> str:
         return run_llm(prompt[:480], max_new_tokens=120)
 
 
-
-
-# Level 1 — Quick Revision: titled one-liner cards
 def generate_quick_revision(chunks: list) -> list:
-    step   = max(1, len(chunks) // 10)
+    step = max(1, len(chunks) // 10)
     sample = chunks[::step][:10]
 
-    # Build a single combined prompt — one Claude call for all chunks
     combined = "\n\n---\n\n".join(
-        "SECTION " + str(i+1) + ":\n" + c.page_content[:500]
+        "SECTION " + str(i + 1) + ":\n" + c.page_content[:500]
         for i, c in enumerate(sample)
     )
 
@@ -471,10 +446,7 @@ def generate_quick_revision(chunks: list) -> list:
     raw = _llm_notes(prompt, max_tokens=900)
     items, seen = [], set()
 
-    # Strip markdown formatting Claude sometimes adds
     raw_clean = re.sub(r"[*_`]", "", raw)
-
-    # Split on any line that starts with TOPIC (case-insensitive, with or without newline before)
     blocks = re.split(r"(?i)(?:^|\n)(?=TOPIC\s*:)", raw_clean.strip(), flags=re.MULTILINE)
 
     for block in blocks:
@@ -496,17 +468,12 @@ def generate_quick_revision(chunks: list) -> list:
     return items[:12]
 
 
-# Level 2 — Study Notes: definitions, formulas, comparisons
 def generate_study_notes(chunks: list) -> dict:
-    """
-    Ask Claude to return JSON directly — no regex parsing needed.
-    Falls back gracefully if JSON is malformed.
-    """
-    step   = max(1, len(chunks) // 8)
+    step = max(1, len(chunks) // 8)
     sample = chunks[::step][:8]
 
     combined = "\n\n".join(
-        "[SECTION " + str(i+1) + "]\n" + c.page_content[:500]
+        "[SECTION " + str(i + 1) + "]\n" + c.page_content[:500]
         for i, c in enumerate(sample)
     )
 
@@ -526,45 +493,39 @@ def generate_study_notes(chunks: list) -> dict:
 
     raw = _llm_notes(prompt, max_tokens=1400)
 
-    # strip any markdown code fences Claude might add
     raw = re.sub(r"^```(?:json)?\s*", "", raw.strip(), flags=re.MULTILINE)
     raw = re.sub(r"```\s*$", "", raw.strip(), flags=re.MULTILINE)
     raw = raw.strip()
 
-    # store raw for debug
     st.session_state["_notes_raw"] = raw
 
     try:
         data = json.loads(raw)
         return {
             "definitions": data.get("definitions", []),
-            "formulas":    data.get("formulas",    []),
+            "formulas": data.get("formulas", []),
             "comparisons": data.get("comparisons", []),
         }
     except Exception:
-        # JSON parse failed — try to salvage partial data
-        # by finding the largest valid JSON-like fragment
         try:
-            # find first { and last }
             start = raw.index("{")
-            end   = raw.rindex("}") + 1
-            data  = json.loads(raw[start:end])
+            end = raw.rindex("}") + 1
+            data = json.loads(raw[start:end])
             return {
                 "definitions": data.get("definitions", []),
-                "formulas":    data.get("formulas",    []),
+                "formulas": data.get("formulas", []),
                 "comparisons": data.get("comparisons", []),
             }
         except Exception:
             return {"definitions": [], "formulas": [], "comparisons": [], "_raw": raw}
 
 
-# Level 3 — Deep Notes: concept card with definition + full explanation
 def generate_deep_notes(chunks: list) -> list:
-    step   = max(1, len(chunks) // 6)
+    step = max(1, len(chunks) // 6)
     sample = chunks[::step][:6]
 
     combined = "\n\n---\n\n".join(
-        "SECTION " + str(i+1) + ":\n" + c.page_content[:700]
+        "SECTION " + str(i + 1) + ":\n" + c.page_content[:700]
         for i, c in enumerate(sample)
     )
 
@@ -573,7 +534,7 @@ def generate_deep_notes(chunks: list) -> list:
         "Read the document sections and for each section create a concept note card.\n\n"
         "For each section, output a note card in this exact format:\n\n"
         "CONCEPT: [Name of the main concept/topic in 2-5 words]\n"
-        "DEFINITION: [A clear, complete definition in 2-3 sentences. Must be thorough enough for a student to understand without reading the original text.]\n"
+        "DEFINITION: [A clear, complete definition in 2-3 sentences.]\n"
         "EXPLANATION:\n"
         "- [Point 1: explain one important aspect, at least 1-2 full sentences]\n"
         "- [Point 2: explain another aspect, at least 1-2 full sentences]\n"
@@ -591,10 +552,7 @@ def generate_deep_notes(chunks: list) -> list:
     raw = _llm_notes(prompt, max_tokens=1500)
     notes, seen = [], set()
 
-    # Strip markdown that Claude sometimes adds
     raw_clean = re.sub(r"[*_`#]", "", raw)
-
-    # Split into blocks on any line starting with CONCEPT (case-insensitive)
     card_blocks = re.split(
         r"(?i)(?:^|\n)(?=CONCEPT\s*:)",
         raw_clean.strip(),
@@ -609,18 +567,15 @@ def generate_deep_notes(chunks: list) -> list:
         if not concept or len(concept) < 2:
             continue
 
-        # Definition — everything between DEFINITION: and EXPLANATION: or REMEMBER:
         d_match = re.search(
             r"(?i)DEFINITION\s*:\s*(.+?)(?=\n(?:EXPLANATION|REMEMBER)\s*:|$)",
             block, re.DOTALL
         )
         definition = re.sub(r"\s+", " ", d_match.group(1)).strip() if d_match else ""
 
-        # Remember
-        r_match  = re.search(r"(?i)REMEMBER\s*:\s*(.+)", block)
+        r_match = re.search(r"(?i)REMEMBER\s*:\s*(.+)", block)
         remember = r_match.group(1).strip() if r_match else ""
 
-        # Explanation bullet points
         e_match = re.search(
             r"(?i)EXPLANATION\s*:\s*\n?(.*?)(?=\nREMEMBER\s*:|$)",
             block, re.DOTALL
@@ -636,13 +591,293 @@ def generate_deep_notes(chunks: list) -> list:
         if key not in seen:
             seen.add(key)
             notes.append({
-                "concept":    concept,
+                "concept": concept,
                 "definition": definition if definition else "See explanation below.",
-                "points":     points[:4],
-                "remember":   remember,
+                "points": points[:4],
+                "remember": remember,
             })
 
     return notes[:8]
+
+
+# ── Smart Session Analysis ────────────────────────────────────────────────────
+def _sa_get_quiz_score() -> float:
+    qr = st.session_state.get("quiz_result")
+    if not qr:
+        return None
+    total = qr.get("total", 0)
+    if total == 0:
+        return None
+    return round((qr.get("score", 0) / total) * 100, 1)
+
+
+def _sa_classify_questions(chat_history: list) -> dict:
+    basic_kw = ["what is", "define", "meaning", "explain", "briefly", "what are"]
+    intermediate_kw = ["difference", "compare", "how does", "why is", "advantages",
+                       "purpose", "distinguish", "between"]
+    advanced_kw = ["why does", "limitations", "when to use", "how to improve",
+                   "applications", "real world", "implement", "evaluate", "analyse"]
+
+    counts = {"basic": 0, "intermediate": 0, "advanced": 0}
+    for msg in chat_history:
+        q = msg.get("question", "").lower()
+        if any(w in q for w in advanced_kw):
+            counts["advanced"] += 1
+        elif any(w in q for w in intermediate_kw):
+            counts["intermediate"] += 1
+        else:
+            counts["basic"] += 1
+
+    total = max(sum(counts.values()), 1)
+    weighted = (counts["basic"] * 1 + counts["intermediate"] * 2 + counts["advanced"] * 3)
+    quality_score = weighted / total
+    return {"counts": counts, "quality_score": quality_score}
+
+
+def _sa_get_user_type(total_q: int, quality_score: float) -> tuple:
+    high_q = total_q >= 9
+    med_q = 4 <= total_q <= 8
+    low_q = total_q <= 3
+    high_ql = quality_score >= 2.2
+    low_ql = quality_score < 1.7
+
+    if low_q and low_ql:
+        return ("Passive Learner", "You explored the document minimally. Try asking more varied questions.")
+    if high_q and low_ql:
+        return ("Try Hard Learner", "You asked many questions but mostly surface-level. Push deeper!")
+    if low_q and high_ql:
+        return ("Smart Learner", "Few but sharp questions — you focus on what matters most.")
+    if high_q and high_ql:
+        return ("Deep Thinker", "High volume of quality questions. Excellent engagement!")
+    return ("Balanced Learner", "A good mix of questions and depth. Keep it up!")
+
+
+def _sa_get_topics(notes_data) -> list:
+    topics = []
+    if not notes_data:
+        return topics
+
+    if isinstance(notes_data, list):
+        for item in notes_data:
+            if isinstance(item, dict):
+                t = item.get("title") or item.get("concept") or item.get("term") or ""
+                if t:
+                    topics.append(t.lower().strip())
+    elif isinstance(notes_data, dict):
+        for defn in notes_data.get("definitions", []):
+            t = defn.get("term", "")
+            if t:
+                topics.append(t.lower().strip())
+
+    return [t for t in topics if t]
+
+
+def _sa_topic_coverage(topics: list, chat_history: list) -> dict:
+    if not topics:
+        return {"covered": [], "uncovered": [], "pct": 0.0}
+
+    all_questions = " ".join(
+        msg.get("question", "").lower() for msg in chat_history
+    )
+
+    covered = [t for t in topics if t in all_questions or
+               any(word in all_questions for word in t.split() if len(word) > 3)]
+    uncovered = [t for t in topics if t not in covered]
+    pct = round(len(covered) / len(topics) * 100, 1)
+    return {"covered": covered, "uncovered": uncovered, "pct": pct}
+
+
+def run_smart_session_analysis():
+    chat_history = st.session_state.get("chat_history", [])
+    notes_data = st.session_state.get("notes_data")
+    quiz_score = _sa_get_quiz_score()
+
+    total_q = len(chat_history)
+    q_data = _sa_classify_questions(chat_history)
+    quality_score = q_data["quality_score"]
+    user_type, interpretation = _sa_get_user_type(total_q, quality_score)
+
+    topics = _sa_get_topics(notes_data)
+    topic_cov = _sa_topic_coverage(topics, chat_history)
+
+    total_topics = max(len(topics), 1)
+    curiosity_score = round(min(total_q / total_topics, 1) * 100, 1)
+    knowledge_depth = round(((quality_score - 1) / 2) * 100, 1)
+    topic_coverage_pct = topic_cov["pct"]
+    quiz_pct = quiz_score if quiz_score is not None else 0.0
+
+    readiness = round(
+        0.4 * quiz_pct +
+        0.3 * topic_coverage_pct +
+        0.2 * knowledge_depth +
+        0.1 * curiosity_score
+    )
+
+    if readiness >= 85:
+        readiness_label = "🏆 Exam Ready"
+        readiness_color = "#c8f04e"
+    elif readiness >= 70:
+        readiness_label = "✅ Well Prepared"
+        readiness_color = "#6ee7b7"
+    elif readiness >= 40:
+        readiness_label = "📖 Moderate Understanding"
+        readiness_color = "#f0a050"
+    else:
+        readiness_label = "🌱 Beginner"
+        readiness_color = "#e05050"
+
+    st.markdown(
+        "<div style='background:#0f0f0f;border:1px solid #1e1e1e;border-radius:16px;"
+        "padding:1.5rem 1.8rem;margin-top:1rem;'>"
+        "<p style='font-family:Syne,sans-serif;font-weight:800;font-size:1.2rem;"
+        "color:#f0ede6;margin:0 0 0.2rem 0;'>📊 Smart Session Analysis</p>"
+        "<p style='font-size:0.82rem;color:#555;margin:0;'>"
+        "Based on your activity in this session</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("<div style='height:0.8rem;'></div>", unsafe_allow_html=True)
+
+    st.markdown(
+        "<div style='background:#0a0a0a;border:1px solid #1e1e1e;border-radius:14px;"
+        "padding:1.5rem;text-align:center;margin-bottom:1rem;'>"
+        "<p style='font-family:Syne,sans-serif;font-size:0.68rem;font-weight:700;"
+        "letter-spacing:0.12em;color:#555;text-transform:uppercase;margin:0 0 0.4rem;'>"
+        "Final Readiness Score</p>"
+        "<p style='font-family:Syne,sans-serif;font-size:3.2rem;font-weight:800;"
+        "color:" + readiness_color + ";line-height:1;margin:0;'>" + str(readiness) + "%</p>"
+        "<p style='font-size:0.95rem;font-weight:700;color:" + readiness_color + ";"
+        "margin:0.4rem 0 0;'>" + readiness_label + "</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        "<div style='background:#0f0f0f;border:1px solid #191919;border-radius:12px;"
+        "padding:1rem 1.2rem;margin-bottom:0.8rem;'>"
+        "<p style='font-family:Syne,sans-serif;font-size:0.68rem;font-weight:700;"
+        "letter-spacing:0.12em;color:#c8f04e;text-transform:uppercase;margin:0 0 0.3rem;'>"
+        "🧠 Learning Style</p>"
+        "<p style='font-family:Syne,sans-serif;font-size:1rem;font-weight:800;"
+        "color:#f0ede6;margin:0 0 0.2rem;'>" + user_type + "</p>"
+        "<p style='font-size:0.83rem;color:#666;margin:0;'>" + interpretation + "</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    m1, m2, m3 = st.columns(3)
+    with m1:
+        st.metric("💬 Curiosity Score", str(curiosity_score) + "%")
+        st.progress(int(curiosity_score))
+    with m2:
+        st.metric("🔍 Knowledge Depth", str(knowledge_depth) + "%")
+        st.progress(int(knowledge_depth))
+    with m3:
+        if quiz_score is not None:
+            st.metric("📝 Quiz Score", str(quiz_score) + "%")
+            st.progress(int(quiz_score))
+        else:
+            st.metric("📝 Quiz Score", "Not attempted")
+            st.progress(0)
+
+    st.markdown("<div style='height:0.6rem;'></div>", unsafe_allow_html=True)
+
+    st.markdown(
+        "<p style='font-family:Syne,sans-serif;font-size:0.68rem;font-weight:700;"
+        "letter-spacing:0.12em;color:#c8f04e;text-transform:uppercase;margin:0.5rem 0 0.4rem;'>"
+        "📚 Topic Coverage — " + str(topic_coverage_pct) + "%</p>",
+        unsafe_allow_html=True,
+    )
+    st.progress(int(topic_coverage_pct))
+
+    if topics:
+        tc1, tc2 = st.columns(2)
+        with tc1:
+            st.markdown(
+                "<p style='font-size:0.75rem;color:#c8f04e;font-weight:600;"
+                "margin:0.5rem 0 0.3rem;'>✅ Covered Topics</p>",
+                unsafe_allow_html=True,
+            )
+            if topic_cov["covered"]:
+                for t in topic_cov["covered"]:
+                    st.markdown(
+                        "<div style='background:#0a1400;border:1px solid #1e2d04;"
+                        "border-radius:6px;padding:0.3rem 0.7rem;margin:0.2rem 0;"
+                        "font-size:0.82rem;color:#c8f04e;'>" + t.title() + "</div>",
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.markdown("<p style='font-size:0.8rem;color:#333;'>None yet</p>",
+                            unsafe_allow_html=True)
+        with tc2:
+            st.markdown(
+                "<p style='font-size:0.75rem;color:#e05050;font-weight:600;"
+                "margin:0.5rem 0 0.3rem;'>❌ Uncovered Topics</p>",
+                unsafe_allow_html=True,
+            )
+            if topic_cov["uncovered"]:
+                for t in topic_cov["uncovered"]:
+                    st.markdown(
+                        "<div style='background:#140a00;border:1px solid #2d1004;"
+                        "border-radius:6px;padding:0.3rem 0.7rem;margin:0.2rem 0;"
+                        "font-size:0.82rem;color:#e05050;'>" + t.title() + "</div>",
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.markdown("<p style='font-size:0.8rem;color:#333;'>All covered!</p>",
+                            unsafe_allow_html=True)
+    else:
+        st.info("Generate notes first to enable topic coverage tracking.")
+
+    st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='font-family:Syne,sans-serif;font-size:0.68rem;font-weight:700;"
+        "letter-spacing:0.12em;color:#c8f04e;text-transform:uppercase;margin:0.5rem 0 0.4rem;'>"
+        "💬 Question Breakdown</p>",
+        unsafe_allow_html=True,
+    )
+    qb1, qb2, qb3, qb4 = st.columns(4)
+    counts = q_data["counts"]
+    with qb1:
+        st.metric("Total", total_q)
+    with qb2:
+        st.metric("🟢 Basic", counts["basic"])
+    with qb3:
+        st.metric("🟡 Intermediate", counts["intermediate"])
+    with qb4:
+        st.metric("🔴 Advanced", counts["advanced"])
+
+    suggestions = []
+    if topic_coverage_pct < 60:
+        suggestions.append("📒 Review the **Notes** tab — several topics haven't been explored yet.")
+    if quiz_score is not None and quiz_score < 60:
+        suggestions.append("📝 Retake the **Quiz** — your score suggests gaps in understanding.")
+    elif quiz_score is None:
+        suggestions.append("📝 Try the **Quiz** tab — it's the biggest factor in your readiness score.")
+    if knowledge_depth < 50:
+        suggestions.append("🧠 Open **Deep Notes** — your questions are mostly surface-level so far.")
+    if curiosity_score < 40:
+        suggestions.append("💬 Ask more questions in the **Chat** tab to boost your curiosity score.")
+
+    if suggestions:
+        st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
+        st.markdown(
+            "<p style='font-family:Syne,sans-serif;font-size:0.68rem;font-weight:700;"
+            "letter-spacing:0.12em;color:#c8f04e;text-transform:uppercase;margin:0.5rem 0 0.4rem;'>"
+            "💡 Suggestions</p>",
+            unsafe_allow_html=True,
+        )
+        for s in suggestions:
+            st.markdown(
+                "<div style='background:#0f0f0f;border:1px solid #191919;border-left:3px solid #c8f04e;"
+                "border-radius:0 10px 10px 0;padding:0.6rem 1rem;margin:0.35rem 0;"
+                "font-size:0.86rem;color:#d0cdc6;line-height:1.5;'>" + s + "</div>",
+                unsafe_allow_html=True,
+            )
+    else:
+        st.success("🎉 Great work! You've covered the material thoroughly.")
+
+    st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -658,7 +893,6 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # FIX 1 — Language selector with visible label
     st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
     st.selectbox("", ["English", "Hindi", "Marathi"], key="audio_lang", label_visibility="collapsed")
 
@@ -668,19 +902,20 @@ with st.sidebar:
     if uploaded is not None and st.session_state.vectorstore is None:
         with st.spinner("Indexing…"):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(uploaded.read()); path = tmp.name
+                tmp.write(uploaded.read())
+                path = tmp.name
             docs = PyPDFLoader(path).load()
             st.session_state.full_text = "\n\n".join(d.page_content for d in docs)
             chunks = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50).split_documents(docs)
-            st.session_state.chunks      = chunks
+            st.session_state.chunks = chunks
             st.session_state.vectorstore = FAISS.from_documents(chunks, load_embeddings())
             for k in ["summary_bullets", "quiz_items", "chat_history"]:
                 st.session_state[k] = []
             for k in ["flowchart_code", "voice_question"]:
                 st.session_state[k] = ""
-            st.session_state.pdf_audio  = None
+            st.session_state.pdf_audio = None
             st.session_state.notes_level = None
-            st.session_state.notes_data  = None
+            st.session_state.notes_data = None
             os.unlink(path)
         st.success("✓ Ready!")
 
@@ -689,13 +924,14 @@ with st.sidebar:
             st.session_state[k] = v
 
     if st.session_state.vectorstore:
-        pages      = len(set(c.metadata.get("page", 0) for c in st.session_state.chunks))
+        pages = len(set(c.metadata.get("page", 0) for c in st.session_state.chunks))
         chunks_len = len(st.session_state.chunks)
         st.markdown(
             "<div class='stat-row'>"
             "<div class='stat-pill'><strong>" + str(pages) + "</strong>Pages</div>"
             "<div class='stat-pill'><strong>" + str(chunks_len) + "</strong>Chunks</div>"
-            "</div>", unsafe_allow_html=True,
+            "</div>",
+            unsafe_allow_html=True,
         )
         st.markdown("<hr>", unsafe_allow_html=True)
 
@@ -720,12 +956,13 @@ with st.sidebar:
             with st.spinner("Transcribing…"):
                 t = transcribe(rec)
             if t:
-                st.session_state.voice_question      = t
+                st.session_state.voice_question = t
                 st.session_state.auto_answer_pending = True
                 st.success("🎤 Heard: " + t + " — answering…")
                 st.rerun()
             else:
                 st.warning("Couldn't hear clearly. Try again.")
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN AREA
@@ -737,9 +974,8 @@ st.markdown(
 )
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# ── Welcome screen ─────────────────────────────────────────────────────────────
+# ── Welcome screen ────────────────────────────────────────────────────────────
 if not st.session_state.vectorstore:
-    # FIX 2 — Notes card added to welcome screen, 3-column grid
     st.markdown(
         "<div class='welcome-card'>"
         "<div style='font-size:3rem;margin-bottom:0.8rem;'>📄</div>"
@@ -757,8 +993,19 @@ if not st.session_state.vectorstore:
         unsafe_allow_html=True,
     )
 
-# ── Main tabs ─────────────────────────────────────────────────────────────────
+# ── Main tabs (shown after PDF is uploaded) ───────────────────────────────────
 else:
+    # Session Analysis toggle button
+    _sa_left, _sa_right = st.columns([4, 1])
+    with _sa_right:
+        if st.button("📊 Session Analysis", key="sa_toggle"):
+            st.session_state["_sa_open"] = not st.session_state.get("_sa_open", False)
+
+    # Dashboard panel (shown when toggled on)
+    if st.session_state.get("_sa_open", False):
+        run_smart_session_analysis()
+        st.markdown("<hr>", unsafe_allow_html=True)
+
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         ["💬  Chat", "📋  Summary", "🔀  Flowchart", "📒  Notes", "📝  Quiz"]
     )
@@ -766,11 +1013,11 @@ else:
     # ══ TAB 1 — CHAT Q&A ══════════════════════════════════════════════════════
     with tab1:
         st.markdown(
-            "<div class='info-card'><div class='info-card-label'>Chat Q&A </div>"
-            "<p class='info-card-text'>Ask questions by typing or use the mic in the sidebar. "
-            "</p></div>",
+            "<div class='info-card'><div class='info-card-label'>Chat Q&A</div>"
+            "<p class='info-card-text'>Ask questions by typing or use the mic in the sidebar.</p></div>",
             unsafe_allow_html=True,
         )
+
         for msg in st.session_state.chat_history:
             st.markdown(
                 "<div class='chat-bubble-user'><div class='chat-role chat-role-user'>You</div>"
@@ -782,7 +1029,7 @@ else:
                 "<div class='chat-text'>" + msg["answer"] + "</div></div>",
                 unsafe_allow_html=True,
             )
-           
+
         if st.session_state.chat_history:
             last_ans = st.session_state.chat_history[-1]["answer"]
             st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
@@ -803,7 +1050,7 @@ else:
         if st.session_state.auto_answer_pending and st.session_state.voice_question.strip():
             auto_q = st.session_state.voice_question.strip()
             st.session_state.auto_answer_pending = False
-            st.session_state.voice_question      = ""
+            st.session_state.voice_question = ""
             with st.spinner("Finding answer…"):
                 ans, srcs = answer_with_sources(auto_q, st.session_state.vectorstore)
             with st.spinner("Generating audio answer…"):
@@ -820,11 +1067,12 @@ else:
             )
         with col2:
             ask = st.button("Ask →")
+
         if ask and question.strip():
             with st.spinner("Thinking…"):
                 ans, __ = answer_with_sources(question.strip(), st.session_state.vectorstore)
             st.session_state.chat_history.append({"question": question.strip(), "answer": ans})
-            st.session_state.voice_question    = ""
+            st.session_state.voice_question = ""
             st.session_state["last_ans_audio"] = None
             st.rerun()
 
@@ -839,6 +1087,7 @@ else:
             with st.spinner("Summarizing… may take ~30s for large PDFs."):
                 st.session_state.summary_bullets = summarize_to_bullets(st.session_state.chunks)
             st.rerun()
+
         if st.session_state.summary_bullets:
             for point in st.session_state.summary_bullets:
                 st.markdown(
@@ -861,8 +1110,9 @@ else:
         )
         if st.button("🔀 Generate Flowchart"):
             with st.spinner("Extracting concepts…"):
-                st.session_state.flowchart_code  = generate_flowchart(st.session_state.chunks)
+                st.session_state.flowchart_code = generate_flowchart(st.session_state.chunks)
                 st.session_state["_flow_tried"] = True
+
         if st.session_state.flowchart_code:
             render_mermaid(st.session_state.flowchart_code)
             with st.expander("View Mermaid diagram code"):
@@ -883,7 +1133,7 @@ else:
             if _k not in st.session_state:
                 st.session_state[_k] = _v
 
-        # ── Level selector cards ──────────────────────────────────────────────
+        # Level selector cards
         nc1, nc2, nc3 = st.columns(3)
         with nc1:
             st.markdown(
@@ -893,12 +1143,14 @@ else:
                 "<div style='font-family:Syne,sans-serif;font-size:0.82rem;font-weight:700;"
                 "color:#f0ede6;margin:0.3rem 0 0.2rem;'>Quick Revision</div>"
                 "<div style='font-size:0.75rem;color:#555;'>Titled one-line facts<br>for last-minute revision</div>"
-                "</div>", unsafe_allow_html=True,
+                "</div>",
+                unsafe_allow_html=True,
             )
             if st.button("Generate ⚡", key="btn_quick"):
                 st.session_state.notes_level = "quick"
-                st.session_state.notes_data  = None
+                st.session_state.notes_data = None
                 st.rerun()
+
         with nc2:
             st.markdown(
                 "<div style='background:#0f0f0f;border:1px solid #1e1e1e;border-radius:12px;"
@@ -907,12 +1159,14 @@ else:
                 "<div style='font-family:Syne,sans-serif;font-size:0.82rem;font-weight:700;"
                 "color:#f0ede6;margin:0.3rem 0 0.2rem;'>Study Notes</div>"
                 "<div style='font-size:0.75rem;color:#555;'>Definitions, formulas<br>&amp; comparisons</div>"
-                "</div>", unsafe_allow_html=True,
+                "</div>",
+                unsafe_allow_html=True,
             )
             if st.button("Generate 📘", key="btn_study"):
                 st.session_state.notes_level = "study"
-                st.session_state.notes_data  = None
+                st.session_state.notes_data = None
                 st.rerun()
+
         with nc3:
             st.markdown(
                 "<div style='background:#0f0f0f;border:1px solid #1e1e1e;border-radius:12px;"
@@ -921,14 +1175,15 @@ else:
                 "<div style='font-family:Syne,sans-serif;font-size:0.82rem;font-weight:700;"
                 "color:#f0ede6;margin:0.3rem 0 0.2rem;'>Deep Notes</div>"
                 "<div style='font-size:0.75rem;color:#555;'>Concept + definition<br>+ key explanation points</div>"
-                "</div>", unsafe_allow_html=True,
+                "</div>",
+                unsafe_allow_html=True,
             )
             if st.button("Generate 🧠", key="btn_deep"):
                 st.session_state.notes_level = "deep"
-                st.session_state.notes_data  = None
+                st.session_state.notes_data = None
                 st.rerun()
 
-        # ── Generate when level chosen ────────────────────────────────────────
+        # Generate when level chosen
         if st.session_state.notes_level and st.session_state.notes_data is None:
             lmap = {"quick": "Quick Revision", "study": "Study Notes", "deep": "Deep Notes"}
             with st.spinner("Generating " + lmap[st.session_state.notes_level] + "… (~30–60s)"):
@@ -940,83 +1195,48 @@ else:
                     st.session_state.notes_data = generate_deep_notes(st.session_state.chunks)
             st.rerun()
 
-        # ── Render notes ──────────────────────────────────────────────────────
+        # Render notes
         if st.session_state.notes_data is not None:
             level = st.session_state.notes_level
-            data  = st.session_state.notes_data
+            data = st.session_state.notes_data
             st.markdown("<hr>", unsafe_allow_html=True)
 
-                                                     # ── QUICK REVISION ────────────────────────────────────────────────
+            # ── QUICK REVISION ────────────────────────────────────────────────
             if level == "quick":
-
-                st.markdown(
-                    "<p class='section-head'>⚡ Quick Revision Facts</p>",
-                    unsafe_allow_html=True
-                )
+                st.markdown("<p class='section-head'>⚡ Quick Revision Facts</p>", unsafe_allow_html=True)
 
                 cleaned_data = []
 
-                # normal model output
                 if isinstance(data, list) and len(data) > 0:
-
                     for item in data:
-
                         if isinstance(item, dict):
-
                             title = str(
-                                item.get("title")
-                                or item.get("topic")
-                                or item.get("heading")
-                                or item.get("concept")
-                                or "Key Concept"
+                                item.get("title") or item.get("topic") or
+                                item.get("heading") or item.get("concept") or "Key Concept"
                             ).strip()
-
                             fact = str(
-                                item.get("fact")
-                                or item.get("point")
-                                or item.get("statement")
-                                or item.get("content")
-                                or item.get("text")
-                                or ""
+                                item.get("fact") or item.get("point") or
+                                item.get("statement") or item.get("content") or
+                                item.get("text") or ""
                             ).strip()
-
                             if len(title) > 2 and len(fact) > 20:
+                                cleaned_data.append({"title": title, "fact": fact})
 
-                                cleaned_data.append({
-                                    "title": title,
-                                    "fact": fact
-                                })
-
-
-                # fallback if model output is empty or poor
+                # Fallback if model output is empty or poor
                 if not cleaned_data:
-
                     fallback_points = []
 
-                    # use summary bullets if available
                     if st.session_state.summary_bullets:
-
                         for s in st.session_state.summary_bullets:
-
                             if len(s) > 40 and len(s.split()) > 6:
-
                                 fallback_points.append(s)
-
-
-                    # otherwise extract conceptual sentences from chunks
                     else:
-
                         for c in st.session_state.chunks[:30]:
-
                             text = c.page_content.strip()
-
                             sentences = re.split(r"[.]", text)
-
                             for s in sentences:
-
                                 s = s.strip()
                                 s_lower = s.lower()
-
                                 if (
                                     len(s) > 45
                                     and len(s.split()) > 7
@@ -1031,97 +1251,56 @@ else:
                                         or " means " in s_lower
                                     )
                                 ):
-
                                     fallback_points.append(s)
-
                                 if len(fallback_points) >= 8:
                                     break
-
                             if len(fallback_points) >= 8:
                                 break
 
-
                     for point in fallback_points[:8]:
+                        cleaned_data.append({"title": "Key Concept", "fact": point.strip()})
 
-                        cleaned_data.append({
-                            "title": "Key Concept",
-                            "fact": point.strip()
-                        })
-
-
-                # display results
                 if cleaned_data:
-
                     dl_text = "QUICK REVISION NOTES\n" + "=" * 40 + "\n\n"
-
                     for i, item in enumerate(cleaned_data):
-
                         st.markdown(
                             "<div class='note-qr'>"
-                            "<div class='note-qr-num'>" + str(i+1) + "</div>"
+                            "<div class='note-qr-num'>" + str(i + 1) + "</div>"
                             "<div class='note-qr-body'>"
                             "<div class='note-qr-title'>" + item["title"] + "</div>"
                             "<div class='note-qr-fact'>" + item["fact"] + "</div>"
                             "</div></div>",
-                            unsafe_allow_html=True
+                            unsafe_allow_html=True,
                         )
-
-                        dl_text += (
-                            str(i+1)
-                            + ". ["
-                            + item["title"]
-                            + "]\n   "
-                            + item["fact"]
-                            + "\n\n"
-                        )
-
+                        dl_text += str(i + 1) + ". [" + item["title"] + "]\n   " + item["fact"] + "\n\n"
 
                     st.markdown("<div style='height:0.6rem;'></div>", unsafe_allow_html=True)
-
                     col1, col2 = st.columns(2)
-
                     with col1:
-
                         st.download_button(
                             "⬇️ Download (.txt)",
                             data=dl_text,
                             file_name="quick_revision.txt",
-                            mime="text/plain"
+                            mime="text/plain",
                         )
-
-
                     with col2:
-
                         if st.button("🔊 Listen", key="aud_quick"):
-
                             spoken = ". ".join(
-                                item["title"] + ": " + item["fact"]
-                                for item in cleaned_data
+                                item["title"] + ": " + item["fact"] for item in cleaned_data
                             )
-
                             with st.spinner("Generating audio…"):
-
                                 audio_bytes = text_to_audio(spoken)
-
                                 st.audio(audio_bytes, format="audio/mp3")
-
-
                 else:
-
-                    st.warning(
-                        "Could not extract revision points from this PDF."
-                    )
+                    st.warning("Could not extract revision points from this PDF.")
 
             # ── STUDY NOTES ───────────────────────────────────────────────────
             elif level == "study":
-                dl_text = "STUDY NOTES\n" + "="*40 + "\n\n"
+                dl_text = "STUDY NOTES\n" + "=" * 40 + "\n\n"
 
-          
-
-                # Definitions
                 st.markdown("<p class='section-head'>📖 Definitions</p>", unsafe_allow_html=True)
                 if data["definitions"]:
-                    dl_text += "DEFINITIONS\n" + "-"*30 + "\n"
+                    dl_text += "DEFINITIONS\n" + "-" * 30 + "\n"
                     for item in data["definitions"]:
                         st.markdown(
                             "<div class='note-def'>"
@@ -1132,22 +1311,22 @@ else:
                         )
                         dl_text += "• " + item["term"] + ": " + item["definition"] + "\n"
                 else:
-                    st.markdown("<p class='empty-note'>No definitions found in this document.</p>", unsafe_allow_html=True)
+                    st.markdown("<p class='empty-note'>No definitions found in this document.</p>",
+                                unsafe_allow_html=True)
 
-                # Formulas
-                st.markdown("<p class='section-head'>🔢 Formulas &amp; Key Values</p>", unsafe_allow_html=True)
+                st.markdown("<p class='section-head'>🔢 Formulas &amp; Key Values</p>",
+                            unsafe_allow_html=True)
                 if data["formulas"]:
-                    dl_text += "\nFORMULAS & KEY VALUES\n" + "-"*30 + "\n"
+                    dl_text += "\nFORMULAS & KEY VALUES\n" + "-" * 30 + "\n"
                     for item in data["formulas"]:
                         explains_html = (
                             "<div style='font-size:0.78rem;color:#888;margin-top:0.35rem;'>"
-                            + item.get("explains","") + "</div>"
+                            + item.get("explains", "") + "</div>"
                         ) if item.get("explains") else ""
                         st.markdown(
                             "<div class='note-formula'>"
                             "<div class='note-formula-label'>" + item["name"] + "</div>"
-                            + item["value"]
-                            + explains_html +
+                            + item["value"] + explains_html +
                             "</div>",
                             unsafe_allow_html=True,
                         )
@@ -1155,19 +1334,18 @@ else:
                             "\n  → " + item["explains"] if item.get("explains") else ""
                         ) + "\n"
                 else:
-                    st.markdown("<p class='empty-note'>No formulas or key values found in this document.</p>", unsafe_allow_html=True)
+                    st.markdown("<p class='empty-note'>No formulas or key values found in this document.</p>",
+                                unsafe_allow_html=True)
 
-                # Comparisons
                 st.markdown("<p class='section-head'>⚖️ Comparisons</p>", unsafe_allow_html=True)
                 if data["comparisons"]:
-                    dl_text += "\nCOMPARISONS\n" + "-"*30 + "\n"
+                    dl_text += "\nCOMPARISONS\n" + "-" * 30 + "\n"
                     for item in data["comparisons"]:
-                        # Support both old string format and new dict format
                         if isinstance(item, dict):
-                            vs_txt   = item.get("vs", "")
+                            vs_txt = item.get("vs", "")
                             diff_txt = item.get("difference", "")
                         else:
-                            vs_txt   = item
+                            vs_txt = item
                             diff_txt = ""
                         st.markdown(
                             "<div class='note-comp'>"
@@ -1180,21 +1358,17 @@ else:
                             + "</div></div>",
                             unsafe_allow_html=True,
                         )
-                        dl_text += "• " + vs_txt + (
-                            "\n  " + diff_txt if diff_txt else ""
-                        ) + "\n"
+                        dl_text += "• " + vs_txt + ("\n  " + diff_txt if diff_txt else "") + "\n"
                 else:
-                    st.markdown("<p class='empty-note'>No comparisons found in this document.</p>", unsafe_allow_html=True)
+                    st.markdown("<p class='empty-note'>No comparisons found in this document.</p>",
+                                unsafe_allow_html=True)
 
                 st.markdown("<div style='height:0.6rem;'></div>", unsafe_allow_html=True)
                 all_spoken = (
                     "Definitions. " +
                     ". ".join(i["term"] + " means " + i["definition"] for i in data["definitions"]) +
                     " Formulas. " +
-                    ". ".join(
-    				c["vs"] + ". " + c["difference"]
-    				for c in data["comparisons"]
-			)
+                    ". ".join(c["vs"] + ". " + c["difference"] for c in data["comparisons"])
                 )
                 ca, cb = st.columns(2)
                 with ca:
@@ -1209,9 +1383,8 @@ else:
             elif level == "deep":
                 st.markdown("<p class='section-head'>🧠 Deep Notes</p>", unsafe_allow_html=True)
                 if data:
-                    dl_text = "DEEP NOTES\n" + "="*40 + "\n\n"
+                    dl_text = "DEEP NOTES\n" + "=" * 40 + "\n\n"
                     for i, note in enumerate(data):
-                        # Build points HTML
                         pts_html = "".join(
                             "<div class='note-deep-point'>"
                             "<span class='note-deep-dot'>▸</span>"
@@ -1223,15 +1396,14 @@ else:
                             "<div style='background:#0a0f00;border-left:2px solid #555;"
                             "border-radius:0 6px 6px 0;padding:0.5rem 0.8rem;margin-top:0.6rem;"
                             "font-size:0.8rem;color:#888;font-style:italic;'>"
-                            "💡 " + note.get("remember","") + "</div>"
+                            "💡 " + note.get("remember", "") + "</div>"
                         ) if note.get("remember") else ""
 
                         st.markdown(
                             "<div class='note-deep'>"
                             "<div class='note-deep-concept'>🔷 " + note["concept"] + "</div>"
                             "<div class='note-deep-def'>" + note["definition"] + "</div>"
-                            + pts_html
-                            + remember_html +
+                            + pts_html + remember_html +
                             "</div>",
                             unsafe_allow_html=True,
                         )
@@ -1242,6 +1414,7 @@ else:
                             + ("\nRemember: " + note["remember"] if note.get("remember") else "")
                             + "\n\n"
                         )
+
                     st.markdown("<div style='height:0.6rem;'></div>", unsafe_allow_html=True)
                     spoken_deep = ". ".join(
                         note["concept"] + ". " + note["definition"] + ". " +
@@ -1267,6 +1440,7 @@ else:
             "Pick an option for each question, then Submit to see your score.</p></div>",
             unsafe_allow_html=True,
         )
+
         for _k, _v in [("quiz_answers", {}), ("quiz_result", None), ("_quiz_tried", False)]:
             if _k not in st.session_state:
                 st.session_state[_k] = _v
@@ -1275,16 +1449,16 @@ else:
         with col_gen:
             if st.button("📝 Generate Quiz"):
                 with st.spinner("Generating MCQ questions… (~30–45s)"):
-                    st.session_state.quiz_items      = generate_quiz(st.session_state.chunks)
-                    st.session_state["_quiz_tried"]  = True
+                    st.session_state.quiz_items = generate_quiz(st.session_state.chunks)
+                    st.session_state["_quiz_tried"] = True
                     st.session_state["quiz_answers"] = {}
-                    st.session_state["quiz_result"]  = None
+                    st.session_state["quiz_result"] = None
                 st.rerun()
         with col_reset:
             if st.session_state.quiz_items and st.button("🔄 New Quiz"):
-                st.session_state.quiz_items      = []
+                st.session_state.quiz_items = []
                 st.session_state["quiz_answers"] = {}
-                st.session_state["quiz_result"]  = None
+                st.session_state["quiz_result"] = None
                 st.rerun()
 
         if st.session_state.quiz_items:
@@ -1292,12 +1466,12 @@ else:
             for i, item in enumerate(st.session_state.quiz_items):
                 st.markdown(
                     "<div class='quiz-card'>"
-                    "<div class='quiz-num'>Question " + str(i+1) + " of "
+                    "<div class='quiz-num'>Question " + str(i + 1) + " of "
                     + str(len(st.session_state.quiz_items)) + "</div>"
                     "<div class='quiz-q'>❓ " + item["q"] + "</div></div>",
                     unsafe_allow_html=True,
                 )
-                opts   = ["— select an option —"] + item["options"]
+                opts = ["— select an option —"] + item["options"]
                 chosen = st.radio("Options", opts, key="mcq_" + str(i),
                                   label_visibility="collapsed", disabled=disabled)
                 st.session_state["quiz_answers"][str(i)] = chosen
@@ -1309,21 +1483,28 @@ else:
                     score, results = 0, []
                     for i, item in enumerate(st.session_state.quiz_items):
                         chosen = st.session_state["quiz_answers"].get(str(i), "")
-                        ok     = (chosen == item["options"][item["correct"]])
-                        if ok: score += 1
-                        results.append({"q": item["q"], "chosen": chosen,
-                                        "correct": item["options"][item["correct"]], "ok": ok})
+                        ok = (chosen == item["options"][item["correct"]])
+                        if ok:
+                            score += 1
+                        results.append({
+                            "q": item["q"],
+                            "chosen": chosen,
+                            "correct": item["options"][item["correct"]],
+                            "ok": ok,
+                        })
                     st.session_state["quiz_result"] = {
-                        "score": score, "total": len(st.session_state.quiz_items), "details": results
+                        "score": score,
+                        "total": len(st.session_state.quiz_items),
+                        "details": results,
                     }
                     st.rerun()
 
             if st.session_state["quiz_result"]:
-                r     = st.session_state["quiz_result"]
-                pct   = int((r["score"] / r["total"]) * 100)
+                r = st.session_state["quiz_result"]
+                pct = int((r["score"] / r["total"]) * 100)
                 emoji = "🏆" if pct >= 80 else ("👍" if pct >= 50 else "📖")
                 color = "#c8f04e" if pct >= 80 else ("#f0a050" if pct >= 50 else "#e05050")
-                msg   = "Excellent!" if pct >= 80 else ("Good effort!" if pct >= 50 else "Keep reading!")
+                msg = "Excellent!" if pct >= 80 else ("Good effort!" if pct >= 50 else "Keep reading!")
                 st.markdown(
                     "<div style='background:#0f0f0f;border:1px solid #1e1e1e;border-radius:14px;"
                     "padding:1.8rem;text-align:center;margin:1rem 0;'>"
@@ -1333,16 +1514,18 @@ else:
                     "font-weight:700;margin-top:0.4rem;'>" + emoji + "  " + msg + "</div>"
                     "<div style='font-size:0.82rem;color:#555;margin-top:0.3rem;'>"
                     + str(r["score"]) + " correct out of " + str(r["total"]) + " questions</div>"
-                    "</div>", unsafe_allow_html=True,
+                    "</div>",
+                    unsafe_allow_html=True,
                 )
                 st.markdown(
                     "<p style='font-family:Syne,sans-serif;font-size:0.68rem;font-weight:700;"
                     "letter-spacing:0.12em;color:#555;text-transform:uppercase;margin:0.5rem 0;'>"
-                    "Answer Review</p>", unsafe_allow_html=True,
+                    "Answer Review</p>",
+                    unsafe_allow_html=True,
                 )
                 for d in r["details"]:
-                    border     = "#1e2d04" if d["ok"] else "#2d0e0e"
-                    icon       = "✅" if d["ok"] else "❌"
+                    border = "#1e2d04" if d["ok"] else "#2d0e0e"
+                    icon = "✅" if d["ok"] else "❌"
                     your_color = "#c8f04e" if d["ok"] else "#e05050"
                     st.markdown(
                         "<div style='background:#0a0a0a;border:1px solid " + border + ";"
@@ -1357,7 +1540,8 @@ else:
                            "<div style='font-size:0.82rem;color:#666;'>"
                            "Correct answer: <span style='color:#c8f04e;font-weight:500;'>"
                            + d["correct"] + "</span></div>")
-                        + "</div>", unsafe_allow_html=True,
+                        + "</div>",
+                        unsafe_allow_html=True,
                     )
 
         elif not st.session_state.quiz_items and st.session_state.get("_quiz_tried"):
