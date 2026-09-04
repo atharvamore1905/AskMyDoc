@@ -412,11 +412,13 @@ def _llm_notes(prompt: str, max_tokens: int = 800) -> str:
                 "Authorization": "Bearer " + api_key,
             },
             json={
-                "model": "openai/gpt-oss-20b",
-                "max_tokens": max_tokens,
-                "temperature": 0.3,
-                "messages": [{"role": "user", "content": prompt}],
-            },
+    "model": "openai/gpt-oss-20b",
+    "max_tokens": max_tokens,
+    "temperature": 0.3,
+    "reasoning_effort": "low",
+    "response_format": {"type": "json_object"},
+    "messages": [{"role": "user", "content": prompt}],
+},
             timeout=60,
         )
         data = resp.json()
