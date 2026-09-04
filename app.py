@@ -317,7 +317,17 @@ def render_mermaid(code: str):
         "lineColor:'#c8f04e',secondaryColor:'#141414',background:'#0d0d0d',"
         "nodeBorder:'#c8f04e',clusterBkg:'#111',titleColor:'#f0ede6',"
         "edgeLabelBackground:'#0d0d0d',fontSize:'15px'}});"
-        "setTimeout(function(){mermaid.run({nodes:[document.getElementById('chart')]});},300);"
+        "(function(){"
+        "var tries=0;"
+        "function tryRun(){"
+        "if(typeof mermaid!=='undefined'){"
+        "mermaid.run({nodes:[document.getElementById('chart')]});"
+        "}else if(tries<40){"
+        "tries++;setTimeout(tryRun,150);"
+        "}"
+        "}"
+        "tryRun();"
+        "})();"
         "</script></body></html>"
     )
     components.html(html, height=480, scrolling=True)
@@ -339,19 +349,25 @@ def generate_quiz(chunks: list) -> list:
     selected = chunks[::step][:5]
     out = []
     for idx, c in enumerate(selected):
-        q = run_llm(
+        # Use _llm_notes() (Groq llama-3.1-8b-instant, with an automatic
+        # fallback to the local flan-t5 model) instead of calling the local
+        # model directly. Groq produces noticeably more coherent short
+        # questions/answers than flan-t5-base alone, and this degrades to
+        # the exact previous behavior if Groq is unavailable, since
+        # _llm_notes() falls back to the same run_llm() call in that case.
+        q = _llm_notes(
             "Write one clear, specific question about this text.\n"
             "Text: " + c.page_content[:500] + "\nQuestion:",
-            max_new_tokens=50,
+            max_tokens=50,
         ).strip().rstrip(".")
         if not q or len(q) < 8:
             continue
         if not q.endswith("?"):
             q += "?"
-        a = run_llm(
+        a = _llm_notes(
             "Answer in one short phrase (max 10 words) using only this context.\n"
             "Context: " + c.page_content[:500] + "\nQuestion: " + q + "\nAnswer:",
-            max_new_tokens=40,
+            max_tokens=40,
         ).strip().rstrip(".")
         if not a or len(a) < 3:
             continue
@@ -468,6 +484,69 @@ def generate_quick_revision(chunks: list) -> list:
     return items[:12]
 
 
+def _coerce_note_items(raw_list, required_keys: tuple) -> list:
+    """Keep only well-formed dict entries that have all required keys with
+    non-empty string values. This is what stops a single malformed entry
+    (a missing key, a null, a stray string in the array) from raising a
+    KeyError deep in the render code -- previously that would crash the
+    whole Notes tab instead of just skipping the bad entry."""
+    if not isinstance(raw_list, list):
+        return []
+    cleaned = []
+    for item in raw_list:
+        if not isinstance(item, dict):
+            continue
+        row = {}
+        ok = True
+        for key in required_keys:
+            val = item.get(key, "")
+            val = str(val).strip() if val is not None else ""
+            if not val:
+                ok = False
+                break
+            row[key] = val
+        if ok:
+            # keep any extra optional keys too (e.g. "explains")
+            for k, v in item.items():
+                if k not in row and v is not None:
+                    row[k] = str(v).strip()
+            cleaned.append(row)
+    return cleaned
+
+
+def _parse_notes_json(raw: str):
+    """Try progressively more forgiving strategies to parse the model's
+    JSON. Returns (data_dict_or_None, cleaned_raw_text).
+    Does NOT decide what counts as success/failure -- that's the caller's
+    job, so extraction failure and "genuinely nothing found" stay distinct."""
+    cleaned = re.sub(r"^```(?:json)?\s*", "", raw.strip(), flags=re.MULTILINE)
+    cleaned = re.sub(r"```\s*$", "", cleaned.strip(), flags=re.MULTILINE)
+    cleaned = cleaned.strip()
+
+    attempts = [cleaned]
+    if "{" in cleaned and "}" in cleaned:
+        try:
+            start = cleaned.index("{")
+            end = cleaned.rindex("}") + 1
+            attempts.append(cleaned[start:end])
+        except ValueError:
+            pass
+
+    for candidate in attempts:
+        try:
+            return json.loads(candidate), cleaned
+        except Exception:
+            pass
+        # common LLM slip: trailing comma before a closing bracket/brace
+        try:
+            repaired = re.sub(r",\s*([}\]])", r"\1", candidate)
+            return json.loads(repaired), cleaned
+        except Exception:
+            continue
+
+    return None, cleaned
+
+
 def generate_study_notes(chunks: list) -> dict:
     step = max(1, len(chunks) // 8)
     sample = chunks[::step][:8]
@@ -492,32 +571,27 @@ def generate_study_notes(chunks: list) -> dict:
     )
 
     raw = _llm_notes(prompt, max_tokens=1400)
+    data, cleaned_raw = _parse_notes_json(raw)
+    st.session_state["_notes_raw"] = cleaned_raw
 
-    raw = re.sub(r"^```(?:json)?\s*", "", raw.strip(), flags=re.MULTILINE)
-    raw = re.sub(r"```\s*$", "", raw.strip(), flags=re.MULTILINE)
-    raw = raw.strip()
-
-    st.session_state["_notes_raw"] = raw
-
-    try:
-        data = json.loads(raw)
+    if data is None or not isinstance(data, dict):
+        # Case B: the model's response could not be parsed as the requested
+        # JSON at all. This is an extraction failure, not "nothing in the
+        # document" -- keep the two distinguishable via _parse_failed so the
+        # UI can tell the user what actually happened instead of just
+        # printing "No definitions found" for a broken response.
         return {
-            "definitions": data.get("definitions", []),
-            "formulas": data.get("formulas", []),
-            "comparisons": data.get("comparisons", []),
+            "definitions": [], "formulas": [], "comparisons": [],
+            "_parse_failed": True, "_raw": cleaned_raw,
         }
-    except Exception:
-        try:
-            start = raw.index("{")
-            end = raw.rindex("}") + 1
-            data = json.loads(raw[start:end])
-            return {
-                "definitions": data.get("definitions", []),
-                "formulas": data.get("formulas", []),
-                "comparisons": data.get("comparisons", []),
-            }
-        except Exception:
-            return {"definitions": [], "formulas": [], "comparisons": [], "_raw": raw}
+
+    return {
+        "definitions": _coerce_note_items(data.get("definitions", []), ("term", "definition")),
+        "formulas": _coerce_note_items(data.get("formulas", []), ("name", "value")),
+        "comparisons": _coerce_note_items(data.get("comparisons", []), ("vs", "difference")),
+        "_parse_failed": False,
+        "_raw": cleaned_raw,
+    }
 
 
 def generate_deep_notes(chunks: list) -> list:
@@ -687,6 +761,22 @@ def _sa_topic_coverage(topics: list, chat_history: list) -> dict:
     return {"covered": covered, "uncovered": uncovered, "pct": pct}
 
 
+def _sa_pct(value) -> int:
+    """Coerce any score into a valid 0-100 int for st.progress().
+
+    This is a defensive safety net only -- every score fed into st.progress()
+    below is already derived to stay within [0, 100] by construction. It
+    exists in case a future edit to the scoring math breaks that invariant,
+    so the app degrades gracefully instead of raising
+    StreamlitValueOutOfRangeError.
+    """
+    try:
+        v = int(round(float(value)))
+    except (TypeError, ValueError):
+        return 0
+    return max(0, min(100, v))
+
+
 def run_smart_session_analysis():
     chat_history = st.session_state.get("chat_history", [])
     notes_data = st.session_state.get("notes_data")
@@ -702,7 +792,22 @@ def run_smart_session_analysis():
 
     total_topics = max(len(topics), 1)
     curiosity_score = round(min(total_q / total_topics, 1) * 100, 1)
-    knowledge_depth = round(((quality_score - 1) / 2) * 100, 1)
+
+    # knowledge_depth maps the average question-weight (quality_score) from
+    # its natural range of [1, 3] (1=all basic, 3=all advanced) onto [0, 100].
+    # That mapping is only meaningful once at least one question has been
+    # asked. When total_q == 0, _sa_classify_questions still returns
+    # quality_score == 0.0 (weighted=0 / total=max(0,1)=1) purely so it never
+    # divides by zero -- but 0.0 sits *outside* the [1, 3] domain the mapping
+    # assumes, which is exactly what previously produced knowledge_depth =
+    # ((0 - 1) / 2) * 100 = -50 and crashed st.progress(). The real fix is to
+    # special-case "no questions asked yet" as 0% depth (nothing measured
+    # yet), rather than extrapolating the formula outside its valid domain.
+    if total_q == 0:
+        knowledge_depth = 0.0
+    else:
+        knowledge_depth = round(((quality_score - 1) / 2) * 100, 1)
+
     topic_coverage_pct = topic_cov["pct"]
     quiz_pct = quiz_score if quiz_score is not None else 0.0
 
@@ -768,14 +873,14 @@ def run_smart_session_analysis():
     m1, m2, m3 = st.columns(3)
     with m1:
         st.metric("💬 Curiosity Score", str(curiosity_score) + "%")
-        st.progress(int(curiosity_score))
+        st.progress(_sa_pct(curiosity_score))
     with m2:
         st.metric("🔍 Knowledge Depth", str(knowledge_depth) + "%")
-        st.progress(int(knowledge_depth))
+        st.progress(_sa_pct(knowledge_depth))
     with m3:
         if quiz_score is not None:
             st.metric("📝 Quiz Score", str(quiz_score) + "%")
-            st.progress(int(quiz_score))
+            st.progress(_sa_pct(quiz_score))
         else:
             st.metric("📝 Quiz Score", "Not attempted")
             st.progress(0)
@@ -788,7 +893,7 @@ def run_smart_session_analysis():
         "📚 Topic Coverage — " + str(topic_coverage_pct) + "%</p>",
         unsafe_allow_html=True,
     )
-    st.progress(int(topic_coverage_pct))
+    st.progress(_sa_pct(topic_coverage_pct))
 
     if topics:
         tc1, tc2 = st.columns(2)
@@ -1297,6 +1402,25 @@ else:
             # ── STUDY NOTES ───────────────────────────────────────────────────
             elif level == "study":
                 dl_text = "STUDY NOTES\n" + "=" * 40 + "\n\n"
+
+                nothing_extracted = not (data["definitions"] or data["formulas"] or data["comparisons"])
+                if nothing_extracted and data.get("_parse_failed"):
+                    # Case B: the AI's response could not be parsed -- make this
+                    # visibly different from "the document has none of this",
+                    # so a real extraction failure never looks identical to a
+                    # legitimately empty result.
+                    st.warning(
+                        "⚠️ Note extraction failed — the AI's response couldn't be read as "
+                        "structured data. This is **not** the document lacking definitions/"
+                        "formulas/comparisons; the extraction step itself failed. "
+                        "Try Generate again, or check the diagnostics below."
+                    )
+                    with st.expander("🔧 Extraction diagnostics"):
+                        st.caption("Backend status: " + str(st.session_state.get("_claude_error", "n/a")))
+                        st.text_area(
+                            "Raw model output", value=data.get("_raw", ""), height=160,
+                            disabled=True, label_visibility="visible",
+                        )
 
                 st.markdown("<p class='section-head'>📖 Definitions</p>", unsafe_allow_html=True)
                 if data["definitions"]:
