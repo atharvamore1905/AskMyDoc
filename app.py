@@ -390,7 +390,7 @@ def generate_quiz(chunks: list) -> list:
 
 
 # ── Notes functions ───────────────────────────────────────────────────────────
-def _llm_notes(prompt: str, max_tokens: int = 800) -> str:
+def _llm_notes(prompt: str, max_tokens: int = 800, json_mode: bool = False) -> str:
     import os as _os
 
     api_key = _os.environ.get("GROQ_API_KEY", "")
