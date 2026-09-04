@@ -412,7 +412,7 @@ def _llm_notes(prompt: str, max_tokens: int = 800) -> str:
                 "Authorization": "Bearer " + api_key,
             },
             json={
-                "model": "llama-3.1-8b-instant",
+                "model": "openai/gpt-oss-20b",
                 "max_tokens": max_tokens,
                 "temperature": 0.3,
                 "messages": [{"role": "user", "content": prompt}],
