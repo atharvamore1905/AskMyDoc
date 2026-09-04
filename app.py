@@ -461,7 +461,7 @@ def generate_quick_revision(chunks: list) -> list:
         + combined
     )
 
-    raw = _llm_notes(prompt, max_tokens=900)
+    raw = _llm_notes(prompt, max_tokens=1400, json_mode=True)
     items, seen = [], set()
 
     raw_clean = re.sub(r"[*_`]", "", raw)
