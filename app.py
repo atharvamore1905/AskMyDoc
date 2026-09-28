@@ -1002,10 +1002,10 @@ with st.sidebar:
     )
 
     st.markdown("<span class='sidebar-label'>🌐 Audio Language</span>", unsafe_allow_html=True)
-    st.selectbox("", ["English", "Hindi", "Marathi"], key="audio_lang", label_visibility="collapsed")
+    st.selectbox("Audio Language", ["English", "Hindi", "Marathi"], key="audio_lang", label_visibility="collapsed")
 
     st.markdown("<span class='sidebar-label'>Upload PDF</span>", unsafe_allow_html=True)
-    uploaded = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
+    uploaded = st.file_uploader("Upload PDF document", type=["pdf"], label_visibility="collapsed")
 
     if uploaded is not None and st.session_state.vectorstore is None:
         with st.spinner("Indexing…"):
