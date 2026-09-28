@@ -1,6 +1,6 @@
 import streamlit as st
 import tempfile, os, io, re, torch, json, requests
-from transformers.models.t5 import T5Tokenizer as AutoTokenizer, T5ForConditionalGeneration as AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings

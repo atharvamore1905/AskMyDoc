@@ -8,6 +8,7 @@ langchain-text-splitters==0.3.4
 langchain-huggingface==0.3.1
 faiss-cpu==1.9.0.post1
 transformers==4.47.1
+sentencepiece==0.2.0
 sentence-transformers==3.3.1
 pypdf==4.3.1
 torch==2.5.1+cpu
