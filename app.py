@@ -1,6 +1,6 @@
 import streamlit as st
 import tempfile, os, io, re, torch, json, requests
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+# Transformers is lazily imported inside load_llm() to avoid module-level startup crashes
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -166,6 +166,13 @@ def load_embeddings():
 
 @st.cache_resource(show_spinner=False)
 def load_llm():
+    try:
+        from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+    except ImportError as e:
+        raise RuntimeError(
+            f"Failed to load local FLAN-T5 model: transformers library could not be imported ({e}). "
+            "Please check requirements.txt."
+        ) from e
     name = "google/flan-t5-base"
     tok = AutoTokenizer.from_pretrained(name)
     mdl = AutoModelForSeq2SeqLM.from_pretrained(name)
@@ -175,7 +182,10 @@ def load_llm():
 
 # ── Core helpers ──────────────────────────────────────────────────────────────
 def run_llm(prompt: str, max_new_tokens: int = 128) -> str:
-    tok, mdl = load_llm()
+    try:
+        tok, mdl = load_llm()
+    except Exception as e:
+        return f"[Local LLM fallback unavailable: {e}]" 
     inp = tok(prompt, return_tensors="pt", truncation=True, max_length=512)
     with torch.no_grad():
         out = mdl.generate(**inp, max_new_tokens=max_new_tokens, num_beams=2, early_stopping=True)
